@@ -1,11 +1,17 @@
-import express from "express";
-import { createClient } from '@supabase/supabase-js'
-import morgan from "morgan";
-import bodyParser from "body-parser";
-import cors from "cors";
-import dotenv from "dotenv";
-import serverless from "serverless-http";
-dotenv.config()
+// import express from "express";
+// import { createClient } from '@supabase/supabase-js'
+// import morgan from "morgan";
+// import bodyParser from "body-parser";
+// import cors from "cors";
+// import dotenv from "dotenv";
+// import serverless from "serverless-http";
+const express = require('express');
+const { createClient } = require('@supabase/supabase-js')
+const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+require('dotenv').config;
+const serverless = require('serverless-http');
 
 
 const app = express();
@@ -95,5 +101,5 @@ router.get('/', async (req, res) => {
 
 app.use(`/.netlify/functions/api`, router);
 
-module.exports.handler = serverless(app);
 module.exports = app;
+module.exports.handler = serverless(app);
