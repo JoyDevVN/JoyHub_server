@@ -12,7 +12,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config;
 const serverless = require('serverless-http');
-const {enocoding} = require('@netlify/zip-it-and-ship-it')
 
 const app = express();
 
