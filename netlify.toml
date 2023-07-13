@@ -1,5 +1,6 @@
-[build]
+[functions]
   node_bundler="esbuild"
+[build]
   functions="functions"
 [dev]
   publish="dist"
