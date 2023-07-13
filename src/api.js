@@ -13,7 +13,6 @@ const cors = require('cors');
 require('dotenv').config;
 const serverless = require('serverless-http');
 
-
 const app = express();
 
 const router = express.Router();
