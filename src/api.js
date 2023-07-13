@@ -10,6 +10,8 @@ dotenv.config()
 
 const app = express();
 
+const router = express.Router();
+
 app.use(morgan("combined"));
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,9 +21,9 @@ app.use(cors())
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_KEY
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey, {auth: {persistSession: false}});
 
-app.get('/products', async (req, res) => {
+router.get('/products', async (req, res) => {
     const { data, error } = await supabase
         .from('products')
         .select()
@@ -31,7 +33,7 @@ app.get('/products', async (req, res) => {
     }
 });
 
-app.get('/products/:id', async (req, res) => {
+router.get('/products/:id', async (req, res) => {
     const {data, error} = await supabase
         .from('products')
         .select()
@@ -42,7 +44,7 @@ app.get('/products/:id', async (req, res) => {
     res.send(data);
 });
 
-app.put('/products/:id', async (req, res) => {
+router.put('/products/:id', async (req, res) => {
     const {error} = await supabase
         .from('products')
         .update({
@@ -57,7 +59,7 @@ app.put('/products/:id', async (req, res) => {
     res.send("Product updated");
 });
 
-app.delete('/products/:id', async (req, res) => {
+router.delete('/products/:id', async (req, res) => {
     const {error} = await supabase
         .from('products')
         .delete()
@@ -68,7 +70,7 @@ app.delete('/products/:id', async (req, res) => {
     res.send("Product deleted");
 });
 
-app.post('/products', async (req, res) => {
+router.post('/products', async (req, res) => {
     const {data, error} = await supabase
         .from('products')
         .insert({
@@ -82,7 +84,7 @@ app.post('/products', async (req, res) => {
     res.send("Product created");
 });
 
-app.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     res.send("Hello World");
 });
 
@@ -90,6 +92,8 @@ app.get('/', (req, res) => {
 // app.listen(PORT, () => {
 //     console.log(`Server is listening on port ${PORT}`);
 // });
+
+app.use(`/.netlify/functions/api`, router);
 
 module.exports.handler = serverless(app);
 module.exports = app;

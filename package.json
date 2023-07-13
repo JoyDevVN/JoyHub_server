@@ -4,12 +4,11 @@
   "description": "Express Server using Supabase",
   "main": "index.js",
   "scripts": {
-    "build": "babel src -d dist",
+    "build": "netlify-lambda build src",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node dist/index.js",
+    "start": "netlify-lambda serve src",
     "deploy": "netlify-lambda build"
   },
-  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
