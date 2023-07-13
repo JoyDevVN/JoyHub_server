@@ -4,7 +4,7 @@
   "description": "Express Server using Supabase",
   "main": "index.js",
   "scripts": {
-    "build": "NODE_OPTIONS='--openssl-legacy-provider' netlify-lambda build src",
+    "build": "netlify-lambda build src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "netlify-lambda serve src",
     "deploy": "netlify-lambda build"
