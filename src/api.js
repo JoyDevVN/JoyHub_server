@@ -12,11 +12,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config;
 const serverless = require('serverless-http');
-try {
-    require('encoding').convert(''); // If this errors out, we're missing a codec
-}
-catch (e) {
-}
 
 const app = express();
 
