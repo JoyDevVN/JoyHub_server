@@ -1,6 +1,6 @@
-const { createClient } = require('@supabase/supabase-js');
-const dbConfig = require('../configs/db.config');
+import { createClient } from '@supabase/supabase-js';
+import dbConfig from '../configs/db.config.js';
 
 const supabase = createClient(dbConfig.supabaseUrl, dbConfig.supabaseKey, {auth: {persistSession: false}});
 
-module.exports = supabase;
+export default supabase;
