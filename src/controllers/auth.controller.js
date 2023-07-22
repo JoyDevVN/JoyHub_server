@@ -29,7 +29,7 @@ export const loginAccount = async (req, res) => {
     const { username, password } = req.body;
     const { result, token, error } = await login(username, password);
     if (error) {
-        return res.status(500).json({ error, login: false });
+        return res.json({ error, login: false });
     }
     res.header("auth-token", token).json({ message: result, login: true});
 };
@@ -42,7 +42,7 @@ export const verify = async (req, res, next) => {
     }
     const { result, error } = await verifyToken(token);
     if (error) {
-        return res.status(500).json({ error });
+        return res.json({ error });
     }
     req.user = result;
     next();
