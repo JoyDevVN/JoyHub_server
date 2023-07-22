@@ -10,9 +10,9 @@ export const registerAccount = async (req, res) => {
         wallet,
     });
     if (error) {
-        return res.status(500).json({ "message": error, "created": false });
+        return res.json({ "message": error, "created": false });
     }
-    res.json({ "message": message, "created": true});
+    res.status(201).json({ "message": message, "created": true});
 }
 
 export const getAllAccounts = async (req, res) => {
@@ -21,7 +21,7 @@ export const getAllAccounts = async (req, res) => {
     }
     catch (error) {
         console.log(`Get all accounts error: ${error}`)
-        res.status(500).json({ error });
+        res.json({ error });
     }
 }
 
@@ -38,7 +38,7 @@ export const loginAccount = async (req, res) => {
 export const verify = async (req, res, next) => {
     const token = req.header("auth-token");
     if (!token) {
-        return res.status(401).json({ error: "Access denied" });
+        return res.json({ error: "Access denied" });
     }
     const { result, error } = await verifyToken(token);
     if (error) {
