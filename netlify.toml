@@ -5,3 +5,7 @@
   functions="functions"
 [dev]
   publish="dist"
+[[redirect]]
+    from="/*"
+    to="/.netlify/functions/api/"
+    status=200

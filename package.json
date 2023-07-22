@@ -6,17 +6,20 @@
   "scripts": {
     "build": "netlify-lambda build src",
     "start": "netlify-lambda serve src",
-    "deploy": "netlify deploy"
+    "deploy": "netlify deploy --prod"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@netlify/functions": "^1.6.0",
     "@supabase/supabase-js": "^2.26.0",
+    "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "joi": "^17.9.2",
+    "jsonwebtoken": "^9.0.1",
     "morgan": "^1.10.0",
     "netlify-cli": "^15.9.0",
     "netlify-lambda": "^2.0.16",
