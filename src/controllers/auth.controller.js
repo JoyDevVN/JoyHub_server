@@ -10,9 +10,9 @@ export const registerAccount = async (req, res) => {
         wallet,
     });
     if (error) {
-        return res.status(500).json({ error });
+        return res.status(500).json({ "message": error, "created": false });
     }
-    res.json({message, "created": true});
+    res.json({ "message": message, "created": true});
 }
 
 export const getAllAccounts = async (req, res) => {
@@ -29,9 +29,9 @@ export const loginAccount = async (req, res) => {
     const { username, password } = req.body;
     const { result, token, error } = await login(username, password);
     if (error) {
-        return res.status(500).json({ error });
+        return res.status(500).json({ error, login: false });
     }
-    res.header("auth-token", token).json({ message: result });
+    res.header("auth-token", token).json({ message: result, login: true});
 };
 
 // verify middleware

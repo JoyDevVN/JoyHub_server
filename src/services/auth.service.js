@@ -18,7 +18,7 @@ const registerValidator = (data) => {
             .string()
             .pattern(new RegExp("^[a-zA-Z0-9]{6,30}$"))
             .required(),
-        role_id: joi.number().integer().min(2).max(3).required(),
+        role_id: joi.string().required(),
         wallet: joi.string().pattern(new RegExp("^[0-9]{9,18}$")).required(),
     });
 
@@ -54,11 +54,16 @@ export const register = async (account) => {
         return { error: "Username or email already exists" };
     }
 
+    const role = await getRoleById(account.role_id);
+    if (role.error) {
+        return { error: role.error };
+    }
+
     const { data, error_insert } = await db.from("account").insert({
         username: account.username,
         password: account.password,
         email: account.email,
-        role_id: account.role_id,
+        role_id: role,
         wallet: account.wallet,
     });
     if (error_insert) {
@@ -74,6 +79,17 @@ export const getAccounts = async () => {
         return { error: error.message };
     }
     return data;
+};
+
+const getRoleByName = async (name) => {
+    const { data, error } = await db
+        .from("role")
+        .select("role_id")
+        .eq("name", name);
+    if (error) {
+        return { error: error.message };
+    }
+    return data[0].role_id;
 };
 
 const getAccountByUsername = async (username) => {
