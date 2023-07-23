@@ -16,7 +16,7 @@ export const getAllAccounts = async (req, res) => {
     try {
         res.json(await authService.getAccounts());
     } catch (error) {
-        console.log(`Get all accounts error: ${error}`)
+        // console.log(`Get all accounts error: ${error}`);
         res.status(401).json({error});
     }
 }

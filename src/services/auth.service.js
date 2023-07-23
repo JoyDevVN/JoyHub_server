@@ -23,7 +23,7 @@ const registerValidator = (data) => {
 
     const result = rule.validate(data);
     if (result.error) {
-        console.log(`[VALIDATING] ${result.error.details[0].message}`)
+        // console.log(`[VALIDATING] ${result.error.details[0].message}`)
         throw new Error(result.error.details[0].message);
     }
 };
@@ -73,7 +73,7 @@ export const register = async (account) => {
 
     try {
         registerValidator(account);
-        console.log(`[INFO]Service Registering account ${JSON.stringify(account)}`);
+        // console.log(`[INFO]Service Registering account ${JSON.stringify(account)}`);
         await isExist(account.username, account.email);
         const {role_id: role} = await getRoleByName(account.role);
         const { error: error_insert } = await db.from("account").insert({
@@ -84,7 +84,7 @@ export const register = async (account) => {
             wallet: account.wallet,
         });
         if (error_insert) {
-            console.log(`[ERROR] Insert account fail: ${error_insert.message}`);
+            // console.log(`[ERROR] Insert account fail: ${error_insert.message}`);
             return { error: error_insert.message };
         }
         if (account.role === "customer") {
@@ -119,11 +119,11 @@ export const register = async (account) => {
                 return { error: error_insert.message };
             }
         }
-        console.log(`[SUCCESS] Account ${account.username} created`);
+        // console.log(`[SUCCESS] Account ${account.username} created`);
         return { result: `Account ${account.username} created` };
     }
     catch (error) {
-        console.log(`[ERROR] ${error.message}`);
+        // console.log(`[ERROR] ${error.message}`);
         const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
         return { error: error.message };
     }
@@ -148,23 +148,23 @@ const getAccountByUsername = async (username) => {
     if (data.length === 0) {
         throw new Error("User not found");
     }
-    console.log(`Data: ${JSON.stringify(data[0])}`)
+    // console.log(`Data: ${JSON.stringify(data[0])}`)
     return { result: data[0]};
 };
 
 export const login = async (username, password) => {
     try {
         const {result: user} = await getAccountByUsername(username);
-        console.log(`Password: ${user.password} - ${password}`);
+        // console.log(`Password: ${user.password} - ${password}`);
         if (bcrypt.compare(password, user.password) === false) {
             return { error: "Wrong password" };
         }
         const token = jwt.sign({ username }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
-        console.log(`[SUCCESS] ${username} logged in`)
+        // console.log(`[SUCCESS] ${username} logged in`)
         return { result: "Login success", token: token, role: user.role.name};
     }
     catch (error) {
-        console.log(`[ERROR] ${error.message}`);
+        // console.log(`[ERROR] ${error.message}`);
         return { error: error.message };
     }
 }
