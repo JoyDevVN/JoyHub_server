@@ -1,7 +1,7 @@
 import joi from "joi";
 import db from "./db.service.js";
 import jwt from "jsonwebtoken";
-import {compare, compareSync} from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const registerValidator = (data) => {
     const rule = joi.object({
@@ -156,7 +156,7 @@ export const login = async (username, password) => {
     try {
         const {result: user} = await getAccountByUsername(username);
         console.log(`Password: ${user.password} - ${password}`);
-        if (compareSync(password, user.password) === false) {
+        if (bcrypt.compare(password, user.password) === false) {
             return { error: "Wrong password" };
         }
         const token = jwt.sign({ username }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
