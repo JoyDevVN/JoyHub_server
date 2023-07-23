@@ -78,7 +78,7 @@ export const register = async (account) => {
         const {role_id: role} = await getRoleByName(account.role);
         const { error: error_insert } = await db.from("account").insert({
             username: account.username,
-            password: account.password,
+            password: bcrypt.hashSync(account.password, 10),
             email: account.email,
             role_id: role,
             wallet: account.wallet,
