@@ -11,7 +11,7 @@ const registerValidator = (data) => {
             .pattern(new RegExp("^[a-zA-Z0-9]{6,30}$"))
             .required(),
         role: joi.string().required(),
-        wallet: joi.string().pattern(new RegExp("^[0-9]{9,18}$")).required(),
+        wallet: joi.string().pattern(new RegExp("^[0-9]{9,18}$")),
         full_name: joi.string().min(6).max(30),
         phone: joi.string().pattern(new RegExp("^[0-9]{10}$")),
         hotel_name: joi.string().min(6),
