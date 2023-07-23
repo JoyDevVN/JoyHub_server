@@ -16,8 +16,8 @@ const registerValidator = (data) => {
         phone: joi.string().pattern(new RegExp("^[0-9]{10}$")),
         hotel_name: joi.string().min(6),
         address: joi.string().min(6),
-        description: joi.string().min(6),
-        owner_name: joi.string().min(6)
+        description: joi.string(),
+        owner_name: joi.string()
     });
 
     const result = rule.validate(data);
