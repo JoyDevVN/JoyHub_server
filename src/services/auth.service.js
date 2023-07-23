@@ -2,14 +2,6 @@ import joi from "joi";
 import db from "./db.service.js";
 import jwt from "jsonwebtoken";
 
-const test = async () => {
-    const { data, error } = await db.from("account").select();
-    if (error) {
-        return { error: error.message };
-    }
-    return data;
-};
-
 const registerValidator = (data) => {
     const rule = joi.object({
         username: joi.string().min(6).max(30).required(),
@@ -18,59 +10,122 @@ const registerValidator = (data) => {
             .string()
             .pattern(new RegExp("^[a-zA-Z0-9]{6,30}$"))
             .required(),
-        role_id: joi.string().required(),
+        role: joi.string().required(),
         wallet: joi.string().pattern(new RegExp("^[0-9]{9,18}$")).required(),
+        full_name: joi.string().min(6).max(30),
+        phone: joi.string().pattern(new RegExp("^[0-9]{10}$")),
+        hotel_name: joi.string().min(6),
+        address: joi.string().min(6),
+        description: joi.string().min(6),
+        owner_name: joi.string().min(6)
     });
 
-    // return true if data matches the schema
-    return rule.validate(data);
+    const result = rule.validate(data);
+    if (result.error) {
+        console.log(`[VALIDATING] ${result.error.details[0].message}`)
+        throw new Error(result.error.details[0].message);
+    }
 };
+
+const moderatorValidator = (data) => {
+    const rule = joi.object({
+        username: joi.string().min(6).max(30).required(),
+        hotel_name: joi.string().required(),
+    });
+    const result = rule.validate(data);
+    if (result.error) {
+        throw new Error(result.error.details[0].message);
+    }
+}
 
 const isExist = async (username, email) => {
     const { data, error } = await db
         .from("account")
         .select()
-        .or(`username.eq.${username}`, `email.eq.${email}`);
+        .or(`username.eq.${username}, email.eq.${email}`);
     if (error) {
-        return { error: error.message };
+        throw new Error(error.message);
     }
     if (data.length > 0) {
-        return true;
+        throw new Error("Username or email already exists");
     }
-    return false;
 };
 
-export const register = async (account) => {
-    // validate the data before creating account
-    const { error } = registerValidator(account);
+const getRoleByName = async (name) => {
+    const { data, error } = await db
+        .from("role")
+        .select()
+        .like("name", name);
+    // if query error, throw an error
     if (error) {
-        return { error: error.details[0].message };
+        throw new Error(error.message);
     }
+    // if data is empty, throw an error
+    if (!data || data.length === 0) {
+        throw new Error("Role not found");
+    }
+    // if data is not empty, return the first element
+    return { role_id: data[0]["role_id"] };
+}
 
-    // check if username or email is already in the database
-    const exist = await isExist(account.username, account.email);
-    console.log(`exist: ${exist}`);
-    if (exist) {
-        return { error: "Username or email already exists" };
-    }
+export const register = async (account) => {
 
-    const role = await getRoleById(account.role_id);
-    if (role.error) {
-        return { error: role.error };
+    try {
+        registerValidator(account);
+        console.log(`[INFO]Service Registering account ${JSON.stringify(account)}`);
+        await isExist(account.username, account.email);
+        const {role_id: role} = await getRoleByName(account.role);
+        const { error: error_insert } = await db.from("account").insert({
+            username: account.username,
+            password: account.password,
+            email: account.email,
+            role_id: role,
+            wallet: account.wallet,
+        });
+        if (error_insert) {
+            console.log(`[ERROR] Insert account fail: ${error_insert.message}`);
+            return { error: error_insert.message };
+        }
+        if (account.role === "customer") {
+            // console.log(`[INFO]Service Registering customer ${JSON.stringify(account)}`);
+            const { error: error_insert } = await db.from("customer").insert({
+                account_id: account.username,
+                name: account.full_name || null,
+                phone: account.phone || null,
+            }).select();
+            // console.log(`[INFO]Service Registering customer...`);
+            if (error_insert) {
+                // console.log(`[ERROR] Insert customer fail ${error_insert.message}`);
+                // delete account
+                const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
+                return { error: error_insert.message };
+            }
+        }
+        else if (account.role === "moderator") {
+            // console.log(`[INFO]Service Registering moderator ${JSON.stringify(account)}`);
+            const { error: error_insert } = await db.from("moderator").insert({
+                account_id: account.username,
+                hotel_name: account.hotel_name,
+                address: account.address || null,
+                description: account.description || null,
+                owner_name: account.owner_name || null,
+            });
+            // console.log(`[INFO]Service Registering moderator...`);
+            if (error_insert) {
+                // console.log(`[ERROR] Insert moderator fail ${error_insert.message}`);
+                // delete account
+                const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
+                return { error: error_insert.message };
+            }
+        }
+        console.log(`[SUCCESS] Account ${account.username} created`);
+        return { result: `Account ${account.username} created` };
     }
-
-    const { data, error_insert } = await db.from("account").insert({
-        username: account.username,
-        password: account.password,
-        email: account.email,
-        role_id: role,
-        wallet: account.wallet,
-    });
-    if (error_insert) {
-        return { error: error_insert.message };
+    catch (error) {
+        console.log(`[ERROR] ${error.message}`);
+        const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
+        return { error: error.message };
     }
-    // console.log(`Account ${account.username} created`);
-    return { result: `Account ${account.username} created` };
 };
 
 export const getAccounts = async () => {
@@ -78,45 +133,39 @@ export const getAccounts = async () => {
     if (error) {
         return { error: error.message };
     }
-    return data;
-};
-
-const getRoleByName = async (name) => {
-    const { data, error } = await db
-        .from("role")
-        .select("role_id")
-        .eq("name", name);
-    if (error) {
-        return { error: error.message };
-    }
-    return data[0].role_id;
+    return { result: data };
 };
 
 const getAccountByUsername = async (username) => {
     const { data, error } = await db
         .from("account")
-        .select()
+        .select(`username, password, role(name)`)
         .eq("username", username);
     if (error) {
-        return { error: error.message };
+        throw new Error(error.message);
     }
-    return data;
+    if (data.length === 0) {
+        throw new Error("User not found");
+    }
+    console.log(`Data: ${JSON.stringify(data[0])}`)
+    return { result: data[0]};
 };
 
 export const login = async (username, password) => {
-    const user = await getAccountByUsername(username);
-    if (user.error) {
-        return { error: user.error };
+    try {
+        const {result: user} = await getAccountByUsername(username);
+        console.log(`Password: ${user.password} - ${password}`);
+        if (user.password !== password) {
+            return { error: "Wrong password" };
+        }
+        const token = jwt.sign({ username }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
+        console.log(`[SUCCESS] ${username} logged in`)
+        return { result: "Login success", token: token, role: user.role.name};
     }
-    if (user.length === 0) {
-        return { error: "User not found" };
+    catch (error) {
+        console.log(`[ERROR] ${error.message}`);
+        return { error: error.message };
     }
-
-    if (password != user[0].password) {
-        return { result: "Wrong password"};
-    }
-    const token = jwt.sign({ username }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
-    return { result: "Login success", token };
 }
 
 export const verifyToken = async (token) => {
@@ -127,3 +176,9 @@ export const verifyToken = async (token) => {
         return { error: "Invalid token" };
     }
 };
+export default class authService {
+    static register = register;
+    static getAccounts = getAccounts;
+    static login = login;
+    static verifyToken = verifyToken;
+}
