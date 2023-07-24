@@ -3,9 +3,6 @@
   node_bundler="esbuild"
 [build]
   functions="functions"
+  edge-functions="edge-functions"
 [dev]
   publish="dist"
-[[redirect]]
-    from="/*"
-    to="/.netlify/functions/api/"
-    status=200

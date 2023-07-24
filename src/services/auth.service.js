@@ -70,7 +70,6 @@ const getRoleByName = async (name) => {
 }
 
 export const register = async (account) => {
-
     try {
         registerValidator(account);
         // console.log(`[INFO]Service Registering account ${JSON.stringify(account)}`);
