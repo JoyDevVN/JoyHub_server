@@ -9,8 +9,19 @@ const router = express.Router();
 /// res: { message}
 router.get('/room-type', verify, modController.verifyMod, modController.getRoomType);
 router.post('/room-type', verify, modController.verifyMod, modController.insertRoomType);
-router.post('/new-room', verify, modController.verifyMod, modController.insertNewRoom);
 router.put('/room-type', verify, modController.verifyMod, modController.updateRoomTypeName);
+
+/// /api/mod/room
+/// req.body: { username, room_type_id, room_type_name }
+/// res: { message }
+router.get('/room', verify, modController.verifyMod, modController.getRoomInfo);
+// req.body: { hotel_id, room_id, room_type_id, name, number_of_guest, number_of_bedroom, number_of_bathroom, area, price}
+router.post('/room', verify, modController.verifyMod, modController.insertNewRoom);
+// req.body: { hotel_id, room_id, room_type_id, name, number_of_guest, number_of_bedroom, number_of_bathroom, area, price}
+router.put('/room', verify, modController.verifyMod, modController.updateRoomInfo);
+// req.body: { hotel_id, room_id, room_type_id,}
+router.delete('/room', verify, modController.verifyMod, modController.deleteRoom);
+
 router.get('/test', (req, res) => {
     res.json({ message: "test" });
 });

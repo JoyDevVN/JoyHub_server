@@ -40,6 +40,54 @@ export const insertRoomType = async (room_type) => {
     }
 }
 
+export const updateRoomTypeName = async (room_type) => {
+    try {
+        roomTypeValidator(room_type);
+        const { data, error } = await db
+            .from("room_type")
+            .update({ name: room_type.name })
+            .match({ room_type_id: room_type.room_type_id, hotel_id: room_type.hotel_id })
+            .select();
+        if (error) {
+            return { error: error.message };
+        }
+
+        if (!data || data.length === 0) {
+            return { error: `Invalid request` };
+        }
+        return { result: `successful` };
+    }
+    catch (err) {
+        return { error: err.message };
+    }
+}
+
+export const deleteRoomType = async (room_type_id) => {
+    try {
+        const { data, error } = await db
+            .from("room_type")
+            .delete()
+            .eq("room_type_id", room_type_id)
+        if (error) {
+            return { error: error.message };
+        }
+        return { result: data };
+    }
+    catch (err) {
+        return { error: err.message };
+    }
+}
+
+export const getRoomInfo = async () => {
+    const { data, error } = await db
+        .from("room")
+        .select();
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
+
 const roomValidator = (data) => {
     const rule = joi.object({
         hotel_id: joi.string().required(),
@@ -74,13 +122,24 @@ export const insertNewRoom = async (room) => {
     }
 }
 
-export const updateRoomTypeName = async (room_type) => {
+export const updateRoomInfo = async (room) => {
     try {
-        roomTypeValidator(room_type);
+        roomValidator(room);
         const { data, error } = await db
-            .from("room_type")
-            .update({ name: room_type.name })
-            .match({ room_type_id: room_type.room_type_id, hotel_id: room_type.hotel_id })
+            .from("room")
+            .update({ 
+                name: room.name,
+                number_of_guest: room.number_of_guest,
+                number_of_bedroom: room.number_of_bedroom,
+                number_of_bathroom: room.number_of_bathroom,
+                area: room.area,
+                price: room.price
+            })
+            .match({ 
+                room_type_id: room.room_type_id, 
+                hotel_id: room.hotel_id, 
+                room_id: room.room_id
+            })
             .select();
         if (error) {
             return { error: error.message };
@@ -89,19 +148,19 @@ export const updateRoomTypeName = async (room_type) => {
         if (!data || data.length === 0) {
             return { error: `Invalid request` };
         }
-        return { result: `successful` };
+        return { result: `The room info has been updated successfully!` };
     }
     catch (err) {
         return { error: err.message };
     }
 }
 
-export const deleteRoomType = async (room_type_id) => {
+export const deleteRoom = async (room) => {
     try {
         const { data, error } = await db
-            .from("room_type")
+            .from("room")
             .delete()
-            .eq("room_type_id", room_type_id);
+            .eq("room_id", room.room_id).eq("room_type_id", room.room_type_id).eq("hotel_id", room.hotel_id)
         if (error) {
             return { error: error.message };
         }
@@ -112,10 +171,16 @@ export const deleteRoomType = async (room_type_id) => {
     }
 }
 
+
 export default class modService {
+    // Room-type
     static getRoomType = getRoomType;
     static insertRoomType = insertRoomType;
     static updateRoomTypeName = updateRoomTypeName;
     static deleteRoomType = deleteRoomType;
+    // Room
     static insertNewRoom = insertNewRoom;
+    static getRoomInfo = getRoomInfo;
+    static updateRoomInfo = updateRoomInfo;
+    static deleteRoom = deleteRoom;
 }

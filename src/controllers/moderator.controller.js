@@ -24,14 +24,6 @@ export const insertRoomType = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
-export const insertNewRoom = async (req, res) => {
-    const { result, error } = await modService.insertNewRoom(req.body);
-    if (error) {
-        return res.status(401).json({ message: error });
-    }
-    res.status(200).json({ message: result });
-};
-
 export const updateRoomTypeName = async (req, res) => {
     const { result, error } = await modService.updateRoomTypeName(req.body);
     if (error) {
@@ -40,10 +32,48 @@ export const updateRoomTypeName = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getRoomInfo = async (req, res) => {
+    const { result, error } = await modService.getRoomInfo();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const insertNewRoom = async (req, res) => {
+    const { result, error } = await modService.insertNewRoom(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const updateRoomInfo = async (req, res) => {
+    const { result, error } = await modService.updateRoomInfo(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const deleteRoom = async (req, res) => {
+    const { result, error } = await modService.deleteRoom(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+
 export default class modController {
-    static getRoomType = getRoomType;
     static verifyMod = verifyMod;
+    // Room-type
+    static getRoomType = getRoomType;
     static insertRoomType = insertRoomType;
-    static updateRoomTypeName = updateRoomTypeName;
+    static updateRoomTypeName = updateRoomTypeName; 
+    // Room 
     static insertNewRoom = insertNewRoom;
+    static getRoomInfo = getRoomInfo;
+    static updateRoomInfo = updateRoomInfo;
+    static deleteRoom = deleteRoom;
 }
