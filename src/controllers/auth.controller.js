@@ -14,6 +14,9 @@ export const registerAccount = async (req, res) => {
 
 export const getAllAccounts = async (req, res) => {
     try {
+        if (req.user.role !== "admin") {
+            return res.status(401).json({error: "Access denied"});
+        }
         res.json(await authService.getAccounts());
     } catch (error) {
         // console.log(`Get all accounts error: ${error}`);
@@ -45,6 +48,7 @@ export const verify = async (req, res, next) => {
     if (error) {
         return res.json({error});
     }
+    // console.log(result);
     req.user = result;
     next();
 }

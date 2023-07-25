@@ -28,17 +28,6 @@ const registerValidator = (data) => {
     }
 };
 
-const moderatorValidator = (data) => {
-    const rule = joi.object({
-        username: joi.string().min(6).max(30).required(),
-        hotel_name: joi.string().required(),
-    });
-    const result = rule.validate(data);
-    if (result.error) {
-        throw new Error(result.error.details[0].message);
-    }
-}
-
 const isExist = async (username, email) => {
     const { data, error } = await db
         .from("account")
@@ -158,7 +147,7 @@ export const login = async (username, password) => {
         if (bcrypt.compare(password, user.password) === false) {
             return { error: "Wrong password" };
         }
-        const token = jwt.sign({ username }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
+        const token = jwt.sign({ username: username, role: user.role.name }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
         // console.log(`[SUCCESS] ${username} logged in`)
         return { result: "Login success", token: token, role: user.role.name};
     }
@@ -170,8 +159,9 @@ export const login = async (username, password) => {
 
 export const verifyToken = async (token) => {
     try {
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET);
-        return { result: verified };
+        const verified = jwt.verify(token, process.env.TOKEN_SECRET, {maxAge: 60 * 60 * 24});
+        // console.log(verified)
+        return { result: {username: verified.username, role: verified.role} };
     } catch (error) {
         return { error: "Invalid token" };
     }

@@ -5,6 +5,7 @@ import serverless from 'serverless-http';
 
 // routes
 import authRouter from './routes/auth.route';
+import modRouter from './routes/moderator.route';
 const router = Router();
 
 const app = express();
@@ -19,6 +20,7 @@ router.get('/', (req, res) => {
 });
 
 app.use('/.netlify/functions/api/auth', authRouter);
+app.use('/.netlify/functions/api/mod', modRouter);
 app.use('/.netlify/functions/api', router);
 
 export default app;
