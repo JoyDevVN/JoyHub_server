@@ -40,6 +40,40 @@ export const insertRoomType = async (room_type) => {
     }
 }
 
+const roomValidator = (data) => {
+    const rule = joi.object({
+        hotel_id: joi.string().required(),
+        room_id: joi.string().required(),
+        room_type_id: joi.string().required(),
+        name: joi.string().required(),
+        number_of_guest: joi.string().required(),
+        number_of_bedroom: joi.string().required(),
+        number_of_bathroom: joi.string().required(),
+        area: joi.string().required(),
+        price: joi.string().required(),
+    });
+    const result = rule.validate(data);
+    if (result.error) {
+        throw new Error(result.error.details[0].message);
+    }
+}
+
+export const insertNewRoom = async (room) => {
+    try {
+        roomValidator(room);
+        const { data, error } = await db
+            .from("room")
+            .insert(room);
+        if (error) {
+            return { error: error.message };
+        }
+        return { result: `Inserted ${room.name} into room_type` };
+    }
+    catch (err) {
+        return { error: err.message };
+    }
+}
+
 export const updateRoomTypeName = async (room_type) => {
     try {
         roomTypeValidator(room_type);
@@ -83,4 +117,5 @@ export default class modService {
     static insertRoomType = insertRoomType;
     static updateRoomTypeName = updateRoomTypeName;
     static deleteRoomType = deleteRoomType;
+    static insertNewRoom = insertNewRoom;
 }

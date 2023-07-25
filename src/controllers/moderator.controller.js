@@ -9,15 +9,23 @@ export const getRoomType = async (req, res) => {
 };
 
 export const verifyMod = async (req, res, next) => {
-    if (req.user.role !== "moderator") {
-        return res.status(401).json({ error: "Access denied" });
-    }
+    // if (req.user.role !== "moderator") {
+    //     return res.status(401).json({ error: "Access denied" });
+    // }
     // console.log("verify mod");
     next();
 }
 
 export const insertRoomType = async (req, res) => {
     const { result, error } = await modService.insertRoomType(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const insertNewRoom = async (req, res) => {
+    const { result, error } = await modService.insertNewRoom(req.body);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -37,4 +45,5 @@ export default class modController {
     static verifyMod = verifyMod;
     static insertRoomType = insertRoomType;
     static updateRoomTypeName = updateRoomTypeName;
+    static insertNewRoom = insertNewRoom;
 }

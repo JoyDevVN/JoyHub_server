@@ -9,6 +9,7 @@ const router = express.Router();
 /// res: { message}
 router.get('/room-type', verify, modController.verifyMod, modController.getRoomType);
 router.post('/room-type', verify, modController.verifyMod, modController.insertRoomType);
+router.post('/new-room', verify, modController.verifyMod, modController.insertNewRoom);
 router.put('/room-type', verify, modController.verifyMod, modController.updateRoomTypeName);
 router.get('/test', (req, res) => {
     res.json({ message: "test" });
@@ -19,5 +20,6 @@ router.get('/verify', verify, modController.verifyMod, (req, res) => {
     // }
     res.json({ message: "verify" });
 });
+console.log(router)
 
 export default router;
