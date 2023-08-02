@@ -171,6 +171,42 @@ export const deleteRoom = async (room) => {
     }
 }
 
+export const getHotelInfo = async () => {
+    const { data, error } = await db
+        .from("moderator")
+        .select();
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
+
+export const getHotelById = async (hotel) => {
+    const { data, error } = await db
+        .from("moderator")
+        .select()
+        .match({ 
+            account_id: hotel.account_id, 
+        })
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
+
+export const getHotelRoom = async (hotel) => {
+    const { data, error } = await db
+        .from("room")
+        .select()
+        .match({ 
+            hotel_id: hotel.hotel_id, 
+        })
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
+
 
 export default class modService {
     // Room-type
@@ -183,4 +219,8 @@ export default class modService {
     static getRoomInfo = getRoomInfo;
     static updateRoomInfo = updateRoomInfo;
     static deleteRoom = deleteRoom;
+    // Hotel 
+    static getHotelInfo = getHotelInfo;
+    static getHotelById = getHotelById;
+    static getHotelRoom = getHotelRoom;
 }

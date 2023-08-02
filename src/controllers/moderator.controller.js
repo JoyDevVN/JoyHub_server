@@ -64,6 +64,31 @@ export const deleteRoom = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getHotelInfo = async (req, res) => {
+    const { result, error } = await modService.getHotelInfo();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getHotelById = async (req, res) => {
+    const { result, error } = await modService.getHotelById(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getHotelRoom = async (req, res) => {
+    const { result, error } = await modService.getHotelRoom(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+
 
 export default class modController {
     static verifyMod = verifyMod;
@@ -76,4 +101,9 @@ export default class modController {
     static getRoomInfo = getRoomInfo;
     static updateRoomInfo = updateRoomInfo;
     static deleteRoom = deleteRoom;
+    // Hotel
+    static getHotelInfo = getHotelInfo;
+    static getHotelById = getHotelById;
+    static getHotelRoom = getHotelRoom;
+
 }
