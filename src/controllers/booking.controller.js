@@ -40,6 +40,62 @@ export const deleteBooking = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const addBill = async (req, res) => {
+    const { result, error } = await bookingService.addBill(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const updateBill = async (req, res) => {
+    const { result, error } = await bookingService.updateBill(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getBillList = async (req, res) => {
+    const { result, error } = await bookingService.getBillList(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getBillDetailList = async (req, res) => {
+    const { result, error } = await bookingService.getBillDetailList(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const addBillDetail = async (req, res) => {
+    const { result, error } = await bookingService.addBillDetail(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const deleteBillDetail = async (req, res) => {
+    const { result, error } = await bookingService.deleteBillDetail(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const deleteBill = async (req, res) => {
+    const { result, error } = await bookingService.deleteBill(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
 export default class bookingController {
     // Booking 
     static bookRoom = bookRoom;
@@ -47,4 +103,15 @@ export default class bookingController {
     static getBookingListCustomer = getBookingListCustomer;
     static getBookingListHotel = getBookingListHotel;
     static deleteBooking = deleteBooking;
+
+    //Bill
+    static getBillList = getBillList
+    static addBill = addBill
+    static updateBill = updateBill
+    static deleteBill = deleteBill
+    
+    //Bill_detail
+    static getBillDetailList = getBillDetailList
+    static addBillDetail = addBillDetail
+    static deleteBillDetail = deleteBillDetail
 }
