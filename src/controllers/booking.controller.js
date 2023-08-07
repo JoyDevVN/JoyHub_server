@@ -1,7 +1,15 @@
 import bookingService from "../services/booking.service.js"
 
-export const getBookingList = async (req, res) => {
-    const { result, error } = await bookingService.getBookingList(req.body);
+export const getBookingListHotel = async (req, res) => {
+    const { result, error } = await bookingService.getBookingListHotel(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getBookingListCustomer= async (req, res) => {
+    const { result, error } = await bookingService.getBookingListCustomer(req.body);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -36,6 +44,7 @@ export default class bookingController {
     // Booking 
     static bookRoom = bookRoom;
     static updateBookingInfo = updateBookingInfo;
-    static getBookingList = getBookingList;
+    static getBookingListCustomer = getBookingListCustomer;
+    static getBookingListHotel = getBookingListHotel;
     static deleteBooking = deleteBooking;
 }

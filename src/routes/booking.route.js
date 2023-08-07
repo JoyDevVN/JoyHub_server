@@ -6,9 +6,11 @@ const router = express.Router();
 
 /// /booking/room
 /// req.body: {}
-// Get list of booking for a hotel
 /// req.body: { hotel_id}
-router.get('/room', verify, bookingController.getBookingList);
+// Get list of booking for a hotel
+router.get('/room_hotel', verify, bookingController.getBookingListHotel);
+// Get list of booking for a customer
+router.get('/room_customer', verify, bookingController.getBookingListCustomer);
 /// req.body: { booking_id, hotel_id, room_id, account_id, start_date, end_date}
 router.post('/room', verify, bookingController.bookRoom);
 /// req.body: { booking_id, hotel_id, room_id, account_id, start_date, end_date}

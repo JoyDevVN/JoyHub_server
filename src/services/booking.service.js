@@ -18,13 +18,26 @@ const bookingValidator = (data) => {
     }
 }
 
-export const getBookingList = async (bookingInfo) => {
+export const getBookingListHotel = async (bookingInfo) => {
     const { data, error } = await db
-        .from("booking")
-        .select()
-        .match({
-            hotel_id: bookingInfo.hotel_id,
-        })
+    .from("booking")
+    .select()
+    .match({
+        hotel_id: bookingInfo.hotel_id,
+    })
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
+
+export const getBookingListCustomer = async (bookingInfo) => {
+    const { data, error } = await db
+    .from("booking")
+    .select()
+    .match({
+        account_id: bookingInfo.account_id,
+    })
     if (error) {
         return { error: error.message };
     }
@@ -103,6 +116,7 @@ export default class bookingService {
     // Book room
     static bookRoom = bookRoom
     static updateBookingInfo = updateBookingInfo
-    static getBookingList = getBookingList;
+    static getBookingListCustomer = getBookingListCustomer;
+    static getBookingListHotel = getBookingListHotel;
     static deleteBooking = deleteBooking;
 }
