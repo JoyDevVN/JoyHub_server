@@ -9,9 +9,9 @@ export const getRoomType = async (req, res) => {
 };
 
 export const verifyMod = async (req, res, next) => {
-    // if (req.user.role !== "moderator") {
-    //     return res.status(401).json({ error: "Access denied" });
-    // }
+    if (req.user.role !== "moderator") {
+        return res.status(401).json({ error: "Access denied" });
+    }
     // console.log("verify mod");
     next();
 }
@@ -95,8 +95,8 @@ export default class modController {
     // Room-type
     static getRoomType = getRoomType;
     static insertRoomType = insertRoomType;
-    static updateRoomTypeName = updateRoomTypeName; 
-    // Room 
+    static updateRoomTypeName = updateRoomTypeName;
+    // Room
     static insertNewRoom = insertNewRoom;
     static getRoomInfo = getRoomInfo;
     static updateRoomInfo = updateRoomInfo;

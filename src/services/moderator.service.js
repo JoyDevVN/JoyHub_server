@@ -127,7 +127,7 @@ export const updateRoomInfo = async (room) => {
         roomValidator(room);
         const { data, error } = await db
             .from("room")
-            .update({ 
+            .update({
                 name: room.name,
                 number_of_guest: room.number_of_guest,
                 number_of_bedroom: room.number_of_bedroom,
@@ -135,9 +135,9 @@ export const updateRoomInfo = async (room) => {
                 area: room.area,
                 price: room.price
             })
-            .match({ 
-                room_type_id: room.room_type_id, 
-                hotel_id: room.hotel_id, 
+            .match({
+                room_type_id: room.room_type_id,
+                hotel_id: room.hotel_id,
                 room_id: room.room_id
             })
             .select();
@@ -185,8 +185,8 @@ export const getHotelById = async (hotel) => {
     const { data, error } = await db
         .from("moderator")
         .select()
-        .match({ 
-            account_id: hotel.account_id, 
+        .match({
+            account_id: hotel.account_id,
         })
     if (error) {
         return { error: error.message };
@@ -198,8 +198,8 @@ export const getHotelRoom = async (hotel) => {
     const { data, error } = await db
         .from("room")
         .select()
-        .match({ 
-            hotel_id: hotel.hotel_id, 
+        .match({
+            hotel_id: hotel.hotel_id,
         })
     if (error) {
         return { error: error.message };
@@ -219,7 +219,7 @@ export default class modService {
     static getRoomInfo = getRoomInfo;
     static updateRoomInfo = updateRoomInfo;
     static deleteRoom = deleteRoom;
-    // Hotel 
+    // Hotel
     static getHotelInfo = getHotelInfo;
     static getHotelById = getHotelById;
     static getHotelRoom = getHotelRoom;
