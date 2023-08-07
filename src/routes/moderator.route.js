@@ -28,8 +28,13 @@ router.get('/hotel_list', verify, modController.verifyMod, modController.getHote
 /// /api/mod/hotel
 /// req.body: { account_id }
 router.get('/hotel', verify, modController.verifyMod, modController.getHotelById);
-/// /api/mod/hotel/room
+/// /api/mod/hotel/roomlist
 /// req.body: { hotel_id }
+// Display room list of a hotel
+router.get('/hotel/room_list', verify, modController.verifyMod, modController.getHotelRoomList);
+/// /api/mod/hotel/room
+/// req.body: { hotel_id, room_id}
+// Display detail of a room of a hotel
 router.get('/hotel/room', verify, modController.verifyMod, modController.getHotelRoom);
 
 router.get('/test', (req, res) => {

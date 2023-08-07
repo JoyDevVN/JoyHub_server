@@ -194,7 +194,7 @@ export const getHotelById = async (hotel) => {
     return { result: data };
 }
 
-export const getHotelRoom = async (hotel) => {
+export const getHotelRoomList = async (hotel) => {
     const { data, error } = await db
         .from("room")
         .select()
@@ -207,6 +207,19 @@ export const getHotelRoom = async (hotel) => {
     return { result: data };
 }
 
+export const getHotelRoom = async (hotel) => {
+    const { data, error } = await db
+        .from("room")
+        .select()
+        .match({
+            hotel_id: hotel.hotel_id,
+            room_id: hotel.room_id
+        })
+    if (error) {
+        return { error: error.message };
+    }
+    return { result: data };
+}
 
 export default class modService {
     // Room-type
@@ -222,5 +235,7 @@ export default class modService {
     // Hotel
     static getHotelInfo = getHotelInfo;
     static getHotelById = getHotelById;
+    static getHotelRoomList = getHotelRoomList;
     static getHotelRoom = getHotelRoom;
+
 }

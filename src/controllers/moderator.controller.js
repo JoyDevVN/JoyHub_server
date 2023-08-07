@@ -80,6 +80,14 @@ export const getHotelById = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getHotelRoomList = async (req, res) => {
+    const { result, error } = await modService.getHotelRoomList(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
 export const getHotelRoom = async (req, res) => {
     const { result, error } = await modService.getHotelRoom(req.body);
     if (error) {
@@ -87,8 +95,6 @@ export const getHotelRoom = async (req, res) => {
     }
     res.status(200).json({ message: result });
 };
-
-
 
 export default class modController {
     static verifyMod = verifyMod;
@@ -104,6 +110,8 @@ export default class modController {
     // Hotel
     static getHotelInfo = getHotelInfo;
     static getHotelById = getHotelById;
+    static getHotelRoomList = getHotelRoomList;
     static getHotelRoom = getHotelRoom;
+
 
 }
