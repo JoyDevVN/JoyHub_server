@@ -15,5 +15,4 @@ router.post('/login', authController.loginAccount);
 router.get('/test', (req, res) => {
     res.json({ message: "test" });
 });
-
 export default router;
