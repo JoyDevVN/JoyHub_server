@@ -21,6 +21,6 @@ This reposity is a server to provide a RESTful API for the JoyHub app.
 - **dist**: The folder that will be deployed to the server
 - **functions**: The folder that contains the compiled code from src
 - **src**: The folder that contains the source code
-- **controllers**: The folder that contains the controllers which handle the requests
-- **routes**: The folder that contains the routes which define the endpoints
-- **services**: The folder that contains the services which handle the business logic
+- **src/controllers**: The folder that contains the controllers which handle the requests
+- **src/routes**: The folder that contains the routes which define the endpoints
+- **src/services**: The folder that contains the services which handle the business logic
