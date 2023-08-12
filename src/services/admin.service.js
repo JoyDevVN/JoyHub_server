@@ -31,8 +31,11 @@ const getModerators = async () => {
 const getUnacceptedModerators = async () => {
     const { data, error } = await db
         .from("moderator")
-        .select()
-        .eq("accept", false)
+        .select(`*, account (
+            email
+        )`
+        )
+        .eq("accept", false);
     if (error) {
         throw new Error(error.message);
     }
