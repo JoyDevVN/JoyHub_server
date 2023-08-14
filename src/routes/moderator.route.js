@@ -26,7 +26,6 @@ router.delete('/room', verify, modController.verifyMod, modController.deleteRoom
 /// req.body: {  }
 router.get('/hotel_list', verify, modController.verifyMod, modController.getHotelInfo);
 /// /api/mod/hotel
-/// req.body: { account_id }
 router.get('/hotel', verify, modController.verifyMod, modController.getHotelById);
 /// /api/mod/hotel/roomlist
 /// req.body: { hotel_id }
@@ -35,7 +34,7 @@ router.get('/hotel/room_list', verify, modController.verifyMod, modController.ge
 /// /api/mod/hotel/room
 /// req.body: { hotel_id, room_id}
 // Display detail of a room of a hotel
-router.get('/hotel/room', verify, modController.verifyMod, modController.getHotelRoom);
+router.get('/hotel/room/:id', verify, modController.verifyMod, modController.getHotelRoom);
 
 router.get('/test', (req, res) => {
     res.json({ message: "test" });

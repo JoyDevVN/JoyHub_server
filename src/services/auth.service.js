@@ -1,174 +1,83 @@
-import joi from "joi";
-import db from "./db.service.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-
-const registerValidator = (data) => {
-    const rule = joi.object({
-        username: joi.string().min(6).max(30).required(),
-        email: joi.string().email().required(),
-        password: joi
-            .string()
-            .pattern(new RegExp("^[a-zA-Z0-9]{6,30}$"))
-            .required(),
-        role: joi.string().required(),
-        wallet: joi.string().pattern(new RegExp("^[0-9]{9,18}$")),
-        full_name: joi.string().min(6).max(30),
-        phone: joi.string().pattern(new RegExp("^[0-9]{10}$")),
-        hotel_name: joi.string().min(6),
-        address: joi.string().min(6),
-        description: joi.string().empty(""),
-        owner_name: joi.string().empty(""), // empty string is allowed
-    });
-
-    const result = rule.validate(data);
-    if (result.error) {
-        // console.log(`[VALIDATING] ${result.error.details[0].message}`)
-        throw new Error(result.error.details[0].message);
-    }
-};
+import { Account, Customer, Moderator } from "../databases/account.model.js";
 
 const isExist = async (username, email) => {
-    const { data, error } = await db
-        .from("account")
-        .select()
-        .or(`username.eq.${username}, email.eq.${email}`);
-    if (error) {
-        throw new Error(error.message);
-    }
-    if (data.length > 0) {
-        throw new Error("Username or email already exists");
+    const account = await Account.findOne({
+        $or: [{ username: username }, { email: email }],
+    });
+    if (account) {
+        throw new Error("Username or email is already exist");
     }
 };
 
-const getRoleByName = async (name) => {
-    const { data, error } = await db
-        .from("role")
-        .select()
-        .like("name", name);
-    // if query error, throw an error
-    if (error) {
-        throw new Error(error.message);
-    }
-    // if data is empty, throw an error
-    if (!data || data.length === 0) {
-        throw new Error("Role not found");
-    }
-    // if data is not empty, return the first element
-    return { role_id: data[0]["role_id"] };
-}
-
-export const register = async (account) => {
+const register = async (data) => {
     try {
-        registerValidator(account);
-        // console.log(`[INFO]Service Registering account ${JSON.stringify(account)}`);
-        await isExist(account.username, account.email);
-        const {role_id: role} = await getRoleByName(account.role);
-        const { error: error_insert } = await db.from("account").insert({
-            username: account.username,
-            password: bcrypt.hashSync(account.password, 10),
-            email: account.email,
-            role_id: role,
-            wallet: account.wallet,
+        const { username, email, password, role } = data;
+        // console.log(`[INFO] Registering account ${JSON.stringify(data)}`);
+        // check if username or email already exists
+        // await isExist(username);
+        const salt = await bcrypt.genSalt(10);
+        const account = new Account({
+            username: username,
+            email: email,
+            password: bcrypt.hashSync(password, salt),
+            role: role,
         });
-        if (error_insert) {
-            // console.log(`[ERROR] Insert account fail: ${error_insert.message}`);
-            return { error: error_insert.message };
-        }
-        if (account.role === "customer") {
-            // console.log(`[INFO]Service Registering customer ${JSON.stringify(account)}`);
-            const { error: error_insert } = await db.from("customer").insert({
-                account_id: account.username,
-                name: account.full_name || null,
-                phone: account.phone || null,
-            }).select();
-            // console.log(`[INFO]Service Registering customer...`);
-            if (error_insert) {
-                // console.log(`[ERROR] Insert customer fail ${error_insert.message}`);
-                // delete account
-                const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
-                return { error: error_insert.message };
-            }
-        }
-        else if (account.role === "moderator") {
-            // console.log(`[INFO]Service Registering moderator ${JSON.stringify(account)}`);
-            const { error: error_insert } = await db.from("moderator").insert({
-                account_id: account.username,
-                hotel_name: account.hotel_name,
-                address: account.address || null,
-                description: account.description || null,
-                owner_name: account.owner_name || null,
+        const savedAccount = await account.save();
+        // insert account to customer or hotel
+        if (role === "customer") {
+            const customer = new Customer({
+                account_id: savedAccount._id,
+                full_name: data.full_name,
             });
-            // console.log(`[INFO]Service Registering moderator...`);
-            if (error_insert) {
-                // console.log(`[ERROR] Insert moderator fail ${error_insert.message}`);
-                // delete account
-                const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
-                return { error: error_insert.message };
-            }
+            await customer.save();
+        } else if (role === "moderator") {
+            const moderator = new Moderator({
+                account_id: savedAccount._id,
+                hotel_name: data.hotel_name,
+                address: data.address,
+                description: data.description,
+                owner_name: data.owner_name,
+            });
+            await moderator.save();
         }
-        // console.log(`[SUCCESS] Account ${account.username} created`);
-        return { result: `Account ${account.username} created` };
-    }
-    catch (error) {
-        // console.log(`[ERROR] ${error.message}`);
-        const { error: error_delete } = await db.from("account").delete().eq("username", account.username);
-        return { error: error.message };
-    }
-};
 
-export const getAccounts = async () => {
-    const { data, error } = await db.from("account").select();
-    if (error) {
-        return { error: error.message };
-    }
-    return { result: data };
-};
-
-const getAccountByUsername = async (username) => {
-    const { data, error } = await db
-        .from("account")
-        .select(`username, password, role(name)`)
-        .eq("username", username);
-    if (error) {
-        throw new Error(error.message);
-    }
-    if (data.length === 0) {
-        throw new Error("User not found");
-    }
-    // console.log(`Data: ${JSON.stringify(data[0])}`)
-    return { result: data[0]};
-};
-
-export const login = async (username, password) => {
-    try {
-        const {result: user} = await getAccountByUsername(username);
-        // console.log(`Password: ${user.password} - ${password}`);
-        if (bcrypt.compare(password, user.password) === false) {
-            return { error: "Wrong password" };
-        }
-        const token = jwt.sign({ username: username, role: user.role.name }, process.env.TOKEN_SECRET, {expiresIn: 60 * 60 * 24}); // 1 day
-        // console.log(`[SUCCESS] ${username} logged in`)
-        return { result: "Login success", token: token, role: user.role.name};
-    }
-    catch (error) {
-        // console.log(`[ERROR] ${error.message}`);
-        return { error: error.message };
-    }
-}
-
-export const verifyToken = async (token) => {
-    try {
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET, {maxAge: 60 * 60 * 24});
-        // console.log(verified)
-        return { result: {username: verified.username, role: verified.role} };
+        return { result: `Account ${username} is created`, error: null };
     } catch (error) {
-        return { error: "Invalid token" };
+        return { result: null, error: error.message };
     }
 };
-export default class authService {
-    static register = register;
-    static getAccounts = getAccounts;
-    static login = login;
-    static verifyToken = verifyToken;
-}
+
+const login = async (data) => {
+    try {
+        const { username, password } = data;
+        console.log(`[INFO] Login account ${JSON.stringify(data)}`);
+        // find an account by username
+        const account = await Account.findOne({ username: username });
+        if (!account) {
+            return { result: null, token: null, role: null, error: "Username is not exist" };
+        }
+        // check password
+        const validPassword = await bcrypt.compare(password, account.password);
+        if (!validPassword) {
+            return { result: null, token: null, role: null, error: "Password is not correct" };
+        }
+        // create and assign token
+        const token = jwt.sign({account_id: account._id, role: account.role }, process.env.TOKEN_SECRET, { expiresIn: "24h" });
+        return { result: "Login successfully", token: token, role: account.role, error: null };
+    } catch (error) {
+        return { result: null, token: null, role: null, error: error };
+    }
+};
+
+const verifyToken = (token) => {
+    try {
+        const verified = jwt.verify(token, process.env.TOKEN_SECRET, { maxAge: "24h" });
+        return { result: { account_id: verified.account_id, role: verified.role }, error: null };
+    } catch (error) {
+        return { result: null, error: error };
+    }
+};
+
+export default { register, login, verifyToken };

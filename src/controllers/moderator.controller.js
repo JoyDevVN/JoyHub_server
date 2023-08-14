@@ -10,13 +10,15 @@ export const getRoomType = async (req, res) => {
 
 export const verifyMod = async (req, res, next) => {
     if (req.user.role !== "moderator") {
-        return res.status(401).json({ error: "Access denied" });
+        return res.status(401).json({ error: "Cannot access moderator" });
     }
     // console.log("verify mod");
     next();
 }
 
 export const insertRoomType = async (req, res) => {
+    req.body.hotel_id = req.user.account_id;
+    // console.log(`insertRoomType: ${JSON.stringify(req.body, null, 2)}`);
     const { result, error } = await modService.insertRoomType(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -25,6 +27,7 @@ export const insertRoomType = async (req, res) => {
 };
 
 export const updateRoomTypeName = async (req, res) => {
+    req.body.hotel_id = req.user.account_id;
     const { result, error } = await modService.updateRoomTypeName(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -41,6 +44,7 @@ export const getRoomInfo = async (req, res) => {
 };
 
 export const insertNewRoom = async (req, res) => {
+    req.body.hotel_id = req.user.account_id;
     const { result, error } = await modService.insertNewRoom(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -49,6 +53,7 @@ export const insertNewRoom = async (req, res) => {
 };
 
 export const updateRoomInfo = async (req, res) => {
+    req.body.hotel_id = req.user.account_id;
     const { result, error } = await modService.updateRoomInfo(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -73,7 +78,8 @@ export const getHotelInfo = async (req, res) => {
 };
 
 export const getHotelById = async (req, res) => {
-    const { result, error } = await modService.getHotelById(req.body);
+    const id = req.user.account_id;
+    const { result, error } = await modService.getHotelById(id);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -81,7 +87,8 @@ export const getHotelById = async (req, res) => {
 };
 
 export const getHotelRoomList = async (req, res) => {
-    const { result, error } = await modService.getHotelRoomList(req.body);
+    const id = req.user.account_id;
+    const { result, error } = await modService.getHotelRoomList(id);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -89,7 +96,12 @@ export const getHotelRoomList = async (req, res) => {
 };
 
 export const getHotelRoom = async (req, res) => {
-    const { result, error } = await modService.getHotelRoom(req.body);
+    const id = req.user.account_id;
+    const room_id = req.params.id;
+    if (!room_id) {
+        return res.status(401).json({ message: "Room id is required" });
+    }
+    const { result, error } = await modService.getHotelRoom(id, room_id);
     if (error) {
         return res.status(401).json({ message: error });
     }

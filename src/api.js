@@ -1,15 +1,16 @@
-import express, { Router } from 'express';
-import { json, urlencoded } from 'body-parser';
+import express, {Router} from 'express';
+import {json, urlencoded} from 'body-parser';
 import cors from 'cors';
 import serverless from 'serverless-http';
-
+import logger from 'morgan';
+import mongoose from 'mongoose';
 // routes
 import authRouter from './routes/auth.route';
+// import connectDB from './configs/db.config';
 import modRouter from './routes/moderator.route';
-import adminRouter from './routes/admin.route';
-import bookingRouter from './routes/booking.route';
+// import adminRouter from './routes/admin.route';
+// import bookingRouter from './routes/booking.route';
 const router = Router();
-
 const app = express();
 // middleware
 app.use(json());
@@ -23,9 +24,25 @@ router.get('/', (req, res) => {
 
 app.use('/.netlify/functions/api/auth', authRouter);
 app.use('/.netlify/functions/api/mod', modRouter);
-app.use('/.netlify/functions/api/booking', bookingRouter);
-app.use('/.netlify/functions/api/admin', adminRouter);
+// app.use('/.netlify/functions/api/booking', bookingRouter);
+// app.use('/.netlify/functions/api/admin', adminRouter);
 app.use('/.netlify/functions/api', router);
 
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+}).then(() => {
+    console.log("Successfully connect to MongoDB.");
+}).catch(err => {
+    console.error("Connection error", err.message);
+    process.exit();
+});
 export default app;
-export const handler = serverless(app);
+const app_handler = serverless(app);
+
+export const handler = async (event, context) => {
+    const result = await app_handler(event, context);
+    return result;
+}

@@ -1,15 +1,23 @@
 import joi from "joi";
 import db from "./db.service.js";
 import jwt from "jsonwebtoken";
+import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
+import { Moderator } from "../databases/account.model.js";
 
 export const getRoomType = async () => {
-    const { data, error } = await db
-        .from("room_type")
-        .select();
-    if (error) {
+    // const { data, error } = await db
+    //     .from("room_type")
+    //     .select();
+    // if (error) {
+    //     return { error: error.message };
+    // }
+    // return { result: data };
+    try {
+        const roomType = await RoomType.find();
+        return { result: roomType };
+    } catch (error) {
         return { error: error.message };
     }
-    return { result: data };
 }
 
 const roomTypeValidator = (data) => {
@@ -24,36 +32,38 @@ const roomTypeValidator = (data) => {
     }
 }
 
-export const insertRoomType = async (room_type) => {
+export const insertRoomType = async (data) => {
     try {
-        roomTypeValidator(room_type);
-        const { data, error } = await db
-            .from("room_type")
-            .insert(room_type);
-        if (error) {
-            return { error: error.message };
-        }
-        return { result: `Inserted ${room_type.name} into room_type` };
-    }
-    catch (err) {
-        return { error: err.message };
+        // console.log(JSON.stringify(data, null, 2));
+        const roomType = new RoomType(data);
+        await roomType.save();
+        return { result: `Inserted ${data.name} into data` };
+    } catch (error) {
+        return { error: error.message };
     }
 }
 
-export const updateRoomTypeName = async (room_type) => {
+export const updateRoomTypeName = async (data) => {
     try {
-        roomTypeValidator(room_type);
-        const { data, error } = await db
-            .from("room_type")
-            .update({ name: room_type.name })
-            .match({ room_type_id: room_type.room_type_id, hotel_id: room_type.hotel_id })
-            .select();
-        if (error) {
-            return { error: error.message };
-        }
-
-        if (!data || data.length === 0) {
-            return { error: `Invalid request` };
+        // only update which data requested
+        const result = await RoomType.findOneAndUpdate(
+            {
+                _id: data.room_type_id,
+                hotel_id: data.hotel_id
+            },
+            {
+                name: data.name,
+                description: data.description,
+                price: data.price,
+                number_of_bedroom: data.number_of_bedroom,
+                number_of_bathroom: data.number_of_bathroom,
+                number_of_guest: data.number_of_guest,
+                area: data.area
+            },
+            { new: true }
+        );
+        if (!result) {
+            return { error: error };
         }
         return { result: `successful` };
     }
@@ -64,28 +74,24 @@ export const updateRoomTypeName = async (room_type) => {
 
 export const deleteRoomType = async (room_type_id) => {
     try {
-        const { data, error } = await db
-            .from("room_type")
-            .delete()
-            .eq("room_type_id", room_type_id)
-        if (error) {
-            return { error: error.message };
+        // only delete which data requested
+        const result = RoomType.findOneAndDelete({ _id: room_type_id });
+        if (!result) {
+            return { error: `Invalid request` };
         }
-        return { result: data };
-    }
-    catch (err) {
-        return { error: err.message };
+        return { result: `successful` };
+    } catch (error) {
+        return { error: error.message };
     }
 }
 
 export const getRoomInfo = async () => {
-    const { data, error } = await db
-        .from("room")
-        .select();
-    if (error) {
+    try {
+        const room = await Room.find();
+        return { result: room };
+    } catch (error) {
         return { error: error.message };
     }
-    return { result: data };
 }
 
 const roomValidator = (data) => {
@@ -106,46 +112,57 @@ const roomValidator = (data) => {
     }
 }
 
-export const insertNewRoom = async (room) => {
+export const insertNewRoom = async (data) => {
     try {
-        roomValidator(room);
-        const { data, error } = await db
-            .from("room")
-            .insert(room);
-        if (error) {
-            return { error: error.message };
+        // check if room type exist
+        const room_type = await RoomType.findOne({
+            name: data.room_type,
+            hotel_id: data.hotel_id
+        }).exec();
+        // Get id of room type
+        if (!room_type) {
+            return { error: `Invalid room type` };
         }
-        return { result: `Inserted ${room.name} into room_type` };
+        data.room_type_id = room_type._id;
+        // console.log(JSON.stringify(data, null, 2));
+        // check if room exist
+        const alreadyExist = await Room.findOne({
+            name: data.name,
+            hotel_id: data.hotel_id,
+            room_type_id: data.room_type_id
+        }).exec();
+        if (alreadyExist) {
+            return { error: `Room already exist` };
+        }
+        const room = new Room(data);
+        await room.save();
+        return { result: `Inserted ${data.name} into Room` };
     }
     catch (err) {
         return { error: err.message };
     }
 }
 
-export const updateRoomInfo = async (room) => {
+export const updateRoomInfo = async (data) => {
     try {
-        roomValidator(room);
-        const { data, error } = await db
-            .from("room")
-            .update({
-                name: room.name,
-                number_of_guest: room.number_of_guest,
-                number_of_bedroom: room.number_of_bedroom,
-                number_of_bathroom: room.number_of_bathroom,
-                area: room.area,
-                price: room.price
-            })
-            .match({
-                room_type_id: room.room_type_id,
-                hotel_id: room.hotel_id,
-                room_id: room.room_id
-            })
-            .select();
-        if (error) {
-            return { error: error.message };
-        }
-
-        if (!data || data.length === 0) {
+        const room_type = await RoomType.findOne({
+            name: data.room_type,
+            hotel_id: data.hotel_id
+        }).exec();
+        data.room_type_id = room_type._id;
+        const result = await Room.findOneAndUpdate(
+            {
+                _id: data.room_id,
+                hotel_id: data.hotel_id
+            },
+            {
+                name: data.name,
+                room_type_id: data.room_type_id,
+                isAccepted: data.isAccepted,
+                isBooked: data.isBooked,
+            }
+        );
+        if (!result) {
             return { error: `Invalid request` };
         }
         return { result: `The room info has been updated successfully!` };
@@ -155,16 +172,23 @@ export const updateRoomInfo = async (room) => {
     }
 }
 
-export const deleteRoom = async (room) => {
+export const deleteRoom = async (data) => {
     try {
-        const { data, error } = await db
-            .from("room")
-            .delete()
-            .eq("room_id", room.room_id).eq("room_type_id", room.room_type_id).eq("hotel_id", room.hotel_id)
-        if (error) {
-            return { error: error.message };
+        // const { data, error } = await db
+        //     .from("room")
+        //     .delete()
+        //     .eq("room_id", data.room_id).eq("room_type_id", data.room_type_id).eq("hotel_id", data.hotel_id)
+        // if (error) {
+        //     return { error: error.message };
+        // }
+        // return { result: data };
+        const result = await Room.findOneAndDelete({
+            _id: data.room_id,
+        });
+        if (!result) {
+            return { error: `Invalid request` };
         }
-        return { result: data };
+        return { result: `successful` };
     }
     catch (err) {
         return { error: err.message };
@@ -172,51 +196,70 @@ export const deleteRoom = async (room) => {
 }
 
 export const getHotelInfo = async () => {
-    const { data, error } = await db
-        .from("moderator")
-        .select();
-    if (error) {
-        return { error: error.message };
+    // const { data, error } = await db
+    //     .from("moderator")
+    //     .select();
+    // if (error) {
+    //     return { error: error.message };
+    // }
+    const data = await Moderator.find();
+    if (!data) {
+        return { error: `Invalid request` };
     }
     return { result: data };
 }
 
-export const getHotelById = async (hotel) => {
-    const { data, error } = await db
-        .from("moderator")
-        .select()
-        .match({
-            account_id: hotel.account_id,
-        })
-    if (error) {
-        return { error: error.message };
+export const getHotelById = async (id) => {
+    // const { data, error } = await db
+    //     .from("moderator")
+    //     .select()
+    //     .match({
+    //         account_id: id,
+    //     })
+    // if (error) {
+    //     return { error: error.message };
+    // }
+    const data = await Moderator.findOne({
+        account_id: id,
+    });
+    if (!data) {
+        return { error: `Invalid request` };
     }
     return { result: data };
 }
 
-export const getHotelRoomList = async (hotel) => {
-    const { data, error } = await db
-        .from("room")
-        .select()
-        .match({
-            hotel_id: hotel.hotel_id,
-        })
-    if (error) {
-        return { error: error.message };
+export const getHotelRoomList = async (id) => {
+    const data = await Room.find({
+        hotel_id: id,
+    });
+    if (!data) {
+        return { error: `Invalid request` };
     }
     return { result: data };
 }
 
-export const getHotelRoom = async (hotel) => {
-    const { data, error } = await db
-        .from("room")
-        .select()
-        .match({
-            hotel_id: hotel.hotel_id,
-            room_id: hotel.room_id
-        })
-    if (error) {
-        return { error: error.message };
+export const getHotelRoom = async (hotel_id, room_id) => {
+    let data = await Room.findById(room_id);
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+    const details = await RoomType.findOne({
+        _id: data.room_type_id,
+    });
+    console.log(JSON.stringify(details, null, 2));
+    // combine data
+    data = {
+        ...data._doc,
+        room_type: details.name,
+        guest: details.guest,
+        bedroom: details.bedroom,
+        bathroom: details.bathroom,
+        area: details.area,
+        price: details.price,
+        description: details.description,
+    }
+    if (!data) {
+        return { error: `Invalid request` };
     }
     return { result: data };
 }

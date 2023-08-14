@@ -1,7 +1,7 @@
 import authService from "../services/auth.service.js";
 
 export const registerAccount = async (req, res) => {
-    const {result: result, error: error} = await authService.register(req.body);
+    const { result: result, error: error } = await authService.register(req.body);
     if (error) {
         return res.status(401).json({
             message: error,
@@ -12,21 +12,9 @@ export const registerAccount = async (req, res) => {
     });
 }
 
-export const getAllAccounts = async (req, res) => {
-    try {
-        if (req.user.role !== "admin") {
-            return res.status(401).json({error: "Access denied"});
-        }
-        res.json(await authService.getAccounts());
-    } catch (error) {
-        // console.log(`Get all accounts error: ${error}`);
-        res.status(401).json({error});
-    }
-}
-
 export const loginAccount = async (req, res) => {
-    const {username, password} = req.body;
-    const {result, token, error, role} = await authService.login(username, password);
+    // const {username, password} = req.body;
+    const { result, token, error, role } = await authService.login(req.body);
     if (error) {
         return res.status(401).json({
             message: error,
@@ -42,11 +30,11 @@ export const loginAccount = async (req, res) => {
 export const verify = async (req, res, next) => {
     const token = req.header("auth-token");
     if (!token) {
-        return res.status(401).json({error: "Access denied"});
+        return res.status(401).json({ error: "Access denied" });
     }
-    const {result, error} = await authService.verifyToken(token);
+    const { result, error } = authService.verifyToken(token);
     if (error) {
-        return res.json({error});
+        return res.json({ error });
     }
     // console.log(result);
     req.user = result;
@@ -55,7 +43,7 @@ export const verify = async (req, res, next) => {
 
 export default class authController {
     static registerAccount = registerAccount;
-    static getAllAccounts = getAllAccounts;
+    // static getAllAccounts = getAllAccounts;
     static loginAccount = loginAccount;
     static verify = verify;
 }

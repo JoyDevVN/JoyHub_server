@@ -1,6 +1,6 @@
 import adminService from "../services/admin.service";
 
-export const verifyAdmin = async (req, res, next) => {
+ const verifyAdmin = async (req, res, next) => {
     if (req.user.role !== "admin") {
         return res.status(401).json({error: "Access denied"});
     }
@@ -8,7 +8,7 @@ export const verifyAdmin = async (req, res, next) => {
     next();
 }
 
-export const activeModerator = async (req, res) => {
+ const activeModerator = async (req, res) => {
     const {username} = req.body;
     try {
         const result = await adminService.activeModerator(username);
@@ -19,7 +19,7 @@ export const activeModerator = async (req, res) => {
     }
 }
 
-export const getModerators = async (req, res) => {
+ const getModerators = async (req, res) => {
     try {
         const moderators = await adminService.getModerators();
         res.status(200).json({moderators});
@@ -29,7 +29,7 @@ export const getModerators = async (req, res) => {
     }
 }
 
-export const getUnacceptedModerators = async (req, res) => {
+ const getUnacceptedModerators = async (req, res) => {
     try {
         const moderators = await adminService.getUnacceptedModerators();
         res.status(200).json({moderators});
@@ -39,8 +39,8 @@ export const getUnacceptedModerators = async (req, res) => {
     }
 }
 
-export const removeModerator = async (req, res) => {
-    const {username} = req.params.id;
+ const removeModerator = async (req, res) => {
+    const username = req.params.id;
     try {
         const result = await adminService.removeModerator(username);
         res.status(200).json({message: result});
@@ -50,10 +50,33 @@ export const removeModerator = async (req, res) => {
     }
 }
 
-export default class adminController {
-    static activeModerator = activeModerator;
-    static verifyAdmin = verifyAdmin;
-    static getModerators = getModerators;
-    static removeModerator = removeModerator;
-    static getUnacceptedModerators = getUnacceptedModerators;
+const getRooms = async (req, res) => {
+    try {
+        const rooms = await adminService.getRooms();
+        res.status(200).json(rooms);
+    }
+    catch (error) {
+        res.status(400).json({error: error.message});
+    }
+}
+
+const getUnacceptedRooms = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const rooms = await adminService.getUnacceptedRooms(id);
+        res.status(200).json(rooms);
+    }
+    catch (error) {
+        res.status(400).json({error: error.message});
+    }
+}
+
+export default {
+    verifyAdmin,
+    activeModerator,
+    getModerators,
+    getUnacceptedModerators,
+    removeModerator,
+    getRooms,
+    getUnacceptedRooms,
 }
