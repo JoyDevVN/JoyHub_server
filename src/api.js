@@ -8,7 +8,9 @@ import mongoose from 'mongoose';
 import authRouter from './routes/auth.route';
 // import connectDB from './configs/db.config';
 import modRouter from './routes/moderator.route';
-// import adminRouter from './routes/admin.route';
+import adminRouter from './routes/admin.route';
+import dotenv from 'dotenv';
+dotenv.config();
 // import bookingRouter from './routes/booking.route';
 const router = Router();
 const app = express();
@@ -25,7 +27,7 @@ router.get('/', (req, res) => {
 app.use('/.netlify/functions/api/auth', authRouter);
 app.use('/.netlify/functions/api/mod', modRouter);
 // app.use('/.netlify/functions/api/booking', bookingRouter);
-// app.use('/.netlify/functions/api/admin', adminRouter);
+app.use('/.netlify/functions/api/admin', adminRouter);
 app.use('/.netlify/functions/api', router);
 
 mongoose.connect(process.env.MONGO_URL, {
@@ -34,9 +36,9 @@ mongoose.connect(process.env.MONGO_URL, {
     useCreateIndex: true,
     useFindAndModify: false
 }).then(() => {
-    console.log("Successfully connect to MongoDB.");
+    console.log("[MONGO] Successfully connect to MongoDB.");
 }).catch(err => {
-    console.error("Connection error", err.message);
+    console.error("[MONGO] Connection error", err.message);
     process.exit();
 });
 export default app;
