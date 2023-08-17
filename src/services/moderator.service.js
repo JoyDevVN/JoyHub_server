@@ -1,17 +1,7 @@
-import joi from "joi";
-import db from "./db.service.js";
-import jwt from "jsonwebtoken";
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
 import { Moderator } from "../databases/account.model.js";
 
 export const getRoomType = async () => {
-    // const { data, error } = await db
-    //     .from("room_type")
-    //     .select();
-    // if (error) {
-    //     return { error: error.message };
-    // }
-    // return { result: data };
     try {
         const roomType = await RoomType.find();
         return { result: roomType };

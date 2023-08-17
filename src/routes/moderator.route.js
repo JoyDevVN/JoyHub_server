@@ -45,6 +45,5 @@ router.get('/verify', verify, modController.verifyMod, (req, res) => {
     // }
     res.json({ message: "verify" });
 });
-console.log(router)
 
 export default router;
