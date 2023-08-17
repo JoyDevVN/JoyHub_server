@@ -8,24 +8,45 @@ export const getHotelList = async () => {
     try {
         let datas = await Moderator.aggregate([
             {
-                $lookup:
+                $lookup: 
                 {
-                    from: "rooms",
+                    from: "room_types",
                     localField: "account_id",
                     foreignField: "hotel_id",
-                    as: "rooms",
-                },
-                
+                    pipeline: [
+                        {
+                            $project: 
+                            {
+                                "price": 1
+                            }
+                        }
+                    ],
+                    as: "room_types"
+                }
             },
             {
-                $lookup:
-                {
+                $lookup: {
                     from: "report",
                     localField: "account_id",
                     foreignField: "hotel_id",
-                    as: "review",
-                },
-            }
+                    pipeline: [
+                        {
+                            $project: {
+                                "star": 1,
+                            }
+                        },
+                    ],
+                    as: "reviews"
+                  }
+            },
+            {
+                $project: {
+                    "hotel_name": 1,
+                    "address": 1,
+                    "reviews": 1,
+                    "room_types": 1,
+                }
+            },
         ])
         return { result: datas };
     } catch (error) {
@@ -44,14 +65,91 @@ export const getHotelInfo = async (id) => {
                 }
             },
             {
-                $lookup:
+                $lookup: 
                 {
-                    from: "rooms",
+                    from: "room_types",
                     localField: "account_id",
                     foreignField: "hotel_id",
-                    as: "rooms",
-                },
-                
+                    pipeline: [
+                        {
+                            $addFields:
+                            {
+                                new_id: { $toString: "$_id" }
+                            }
+                            
+                        },
+                        {
+                            $lookup:
+                            {
+                                from: "rooms",
+                                localField: "new_id",
+                                foreignField: "room_type_id",
+                                pipeline: [
+                                    {
+                                        $addFields:
+                                        {
+                                            new_room_id: { $toString: "$_id" }
+                                        }
+                                        
+                                    },
+                                    {
+                                        $lookup:
+                                        {
+                                            from: "room_amenity",
+                                            localField: "new_room_id",
+                                            foreignField: "room_id",
+                                            pipeline: [
+                                                {
+                                                    $lookup:
+                                                    {
+                                                        from: "amenity",
+                                                        localField: "amenity_id",
+                                                        foreignField: "amenity_id",
+                                                        pipeline: [
+                                                            {
+                                                                $project: {
+                                                                    "name": 1,
+                                                                }
+                                                            },
+                                                        ],
+                                                        as: "amenity",
+                                                    },
+                                                },
+                                                {
+                                                    $project: {
+                                                        "amenity": 1,
+                                                    }
+                                                },
+                                            ],
+                                            as: "amenity",
+                                        },
+                                    },
+                                    {
+                                        $project: {
+                                            "name": 1,
+                                            "isBooked": 1,
+                                            "amenity": 1,
+                                        }
+                                    },
+                                ],
+                                as: "room_list",
+                            },
+                            
+                        },
+                        {
+                            $project: {
+                                "name": 1,
+                                "room_list": 1,
+                                "price": 1,
+                                "bedroom": 1,
+                                "bathroom": 1,
+                                "area": 1,
+                                "guest": 1,
+                            }
+                        },
+                    ],
+                    as: "rooms"
+                }
             },
             {
                 $lookup:
@@ -61,7 +159,16 @@ export const getHotelInfo = async (id) => {
                     foreignField: "hotel_id",
                     as: "review",
                 },
-            }
+            },
+            {
+                $project: {
+                    "hotel_name": 1,
+                    "rooms": 1,
+                    "address": 1,
+                    "description": 1,
+                    "review": 1,
+                }
+            },
         ])
         return { result: datas };
     } catch (error) {
