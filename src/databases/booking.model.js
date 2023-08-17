@@ -28,6 +28,17 @@ const bookingSchema = new Schema({
         type: Date,
         required: true,
     },
+    created_at: {
+        type: Date,
+        default: Date.now(),
+    },
+    updated_at: {
+        type: Date,
+    },
+    isCanceled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const billSchema = new Schema({
@@ -41,7 +52,6 @@ const billSchema = new Schema({
     },
     created_at: {
         type: Date,
-        required: true,
         default: Date.now(),
     },
     isPaid: {
@@ -58,10 +68,15 @@ const billSchema = new Schema({
     },
 });
 
-export const bookingModel = model("booking", bookingSchema);
-export const billModel = model("bill", billSchema);
+bookingSchema .pre("save", function (next) {
+    this.updated_at = Date.now();
+    next();
+});
+
+export const Booking = model("booking", bookingSchema);
+export const Bill = model("bill", billSchema);
 
 export default {
-    bookingModel,
-    billModel,
+    Booking,
+    Bill,
 };

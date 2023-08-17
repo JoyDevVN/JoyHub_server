@@ -40,7 +40,7 @@ const roomSchema = new Schema({
         type: String,
         required: true,
     },
-    room_type_id: {
+    room_type: {
         type: String,
         required: true,
     },
@@ -55,6 +55,38 @@ const roomSchema = new Schema({
     isBooked: {
         type: Boolean,
         default: false,
+    },
+    name: {
+        type: String,
+        required: true,
+    },
+    hotel_id: {
+        type: String,
+        required: true,
+    },
+    description: {
+        type: String,
+        required: false,
+    },
+    price: {
+        type: Number,
+        required: true,
+    },
+    guest: {
+        type: Number,
+        required: true,
+    },
+    bedroom: {
+        type: Number,
+        required: true,
+    },
+    bathroom: {
+        type: Number,
+        required: true,
+    },
+    area: {
+        type: Number,
+        required: true,
     },
 });
 

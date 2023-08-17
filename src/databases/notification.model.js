@@ -1,6 +1,18 @@
 import { Schema, model } from 'mongoose';
 const notificationSchema = new Schema({
-    account_id: {
+    from_id: {
+        type: String,
+        required: true,
+    },
+    to_id: {
+        type: String,
+        required: true,
+    },
+    for: {
+        type: String,
+        enum: ['moderator', 'customer'],
+    },
+    title: {
         type: String,
         required: true,
     },
@@ -8,11 +20,21 @@ const notificationSchema = new Schema({
         type: String,
         required: true,
     },
+    status: {
+        type: String,
+        enum: ['accepted', 'cancelled', 'waiting', 'warning', 'approved', 'rejected'],
+    },
+    booking_id: {
+        type: String,
+    },
+    room_id: {
+        type: String,
+    },
     isRead: {
         type: Boolean,
         default: false,
     },
-    created_at: {
+    updated_at: {
         type: Date,
         default: Date.now(),
     },
@@ -39,7 +61,7 @@ const reportSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    created_at: {
+    updated_at: {
         type: Date,
         default: Date.now(),
     },
@@ -66,6 +88,16 @@ const ratingSchema = new Schema({
         type: Date,
         default: Date.now(),
     },
+});
+
+notificationSchema.pre('save', function (next) {
+    this.update({}, { $set: { updated_at: new Date() } });
+    next();
+});
+
+reportSchema.pre('save', function (next) {
+    this.update({}, { $set: { updated_at: new Date() } });
+    next();
 });
 
 export const Notification = model('Notification', notificationSchema);
