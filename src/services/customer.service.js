@@ -4,7 +4,37 @@ import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.
 import { Customer, Moderator } from "../databases/account.model.js";
 import { ObjectId } from "mongoose";
 
-export const getHotelList = async (id) => {
+export const getHotelList = async () => {
+    try {
+        let datas = await Moderator.aggregate([
+            {
+                $lookup:
+                {
+                    from: "rooms",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    as: "rooms",
+                },
+                
+            },
+            {
+                $lookup:
+                {
+                    from: "report",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    as: "review",
+                },
+            }
+        ])
+        return { result: datas };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+
+export const getHotelInfo = async (id) => {
     try {
         let datas = await Moderator.aggregate([
             {   
@@ -67,5 +97,6 @@ export const getRoomAmenity = async (id) => {
 
 export default class customerService {
     static getHotelList = getHotelList;
+    static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
 }
