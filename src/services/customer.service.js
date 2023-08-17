@@ -1,25 +1,65 @@
 import joi from "joi";
-import db from "./db.service.js";
 import jwt from "jsonwebtoken";
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
 import { Customer, Moderator } from "../databases/account.model.js";
+import { ObjectId } from "mongoose";
 
-export const getHotelList = async () => {
+export const getHotelList = async (id) => {
     try {
-        const data = await Moderator.aggregate([
+        let datas = await Moderator.aggregate([
+            {   
+                $match: 
+                {
+                    account_id: id,
+                }
+            },
             {
                 $lookup:
-                    {
-                        from: "room",
-                        localField: "account_id",
-                        foreignField: "hotel_id",
-                        as: "room"
-                    }
+                {
+                    from: "rooms",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    as: "rooms",
+                },
+                
+            },
+            {
+                $lookup:
+                {
+                    from: "report",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    as: "review",
+                },
             }
-        ]
-            
-        );
-        return { result: data };
+        ])
+        return { result: datas };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+export const getRoomAmenity = async (id) => {
+    try {
+        let datas = await Room.aggregate([
+            {   
+                $match: 
+                {
+                    _id: {  $eq: {$toObjectId: id} }
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "room_amenity",
+                    localField: "_id",
+                    foreignField: "room_id",
+                    as: "room_amenity",
+                }
+            }
+        ])
+
+        return { result: datas };
     } catch (error) {
         return { error: error.message };
     }
@@ -27,4 +67,5 @@ export const getHotelList = async () => {
 
 export default class customerService {
     static getHotelList = getHotelList;
+    static getRoomAmenity = getRoomAmenity;
 }
