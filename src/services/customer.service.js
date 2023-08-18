@@ -1,7 +1,8 @@
 import joi from "joi";
 import jwt from "jsonwebtoken";
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
-import { Customer, Moderator } from "../databases/account.model.js";
+import { Notification } from "../databases/notification.model.js";
+import accountModel, { Customer, Moderator } from "../databases/account.model.js";
 import { ObjectId } from "mongoose";
 
 export const getHotelList = async () => {
@@ -144,26 +145,95 @@ export const getRoomAmenity = async (id) => {
     }
 }
 
-export const getNotification = async () => {
+export const getPreBill = async (room_id, account_id) => {
     try {
-        let datas = await Room.aggregate([
+        //let room = await Room.findById(room_id)
+        //let user = await Customer.findOne( {account_id: account_id})
+        
+        let room = await Room.aggregate([
+            {
+                $addFields:
+                {
+                    new_id: { $toString: "$_id" }
+                }
+            },
             {   
                 $match: 
                 {
-                    _id: {  $eq: {$toObjectId: id} }
+                    new_id: room_id
                 }
             },
             {
                 $lookup:
                 {
-                    from: "room_amenity",
-                    localField: "_id",
-                    foreignField: "room_id",
-                    as: "room_amenity",
+                    from: "moderators",
+                    localField: "hotel_id",
+                    foreignField: "account_id",
+                    pipeline: [
+                        {
+                            $project: {
+                                "hotel_name": 1,
+                                "address": 1,
+                            }
+                        },
+                    ],
+                    as: "hotel",
                 }
-            }
+            },
+            {
+                $project: {
+                    "name": 1,
+                    "hotel_id": 1,
+                    "hotel_name": 1,
+                    "price": 1,
+                    "room_type": 1,
+                    "location": 1,
+                    "hotel": 1,
+                }
+            },
+        ])
+        let user = await Customer.aggregate([
+            {
+                $addFields:
+                {
+                    new_id: { $toObjectId: "$account_id" }
+                }
+            },
+            {   
+                $match: 
+                {
+                    account_id: account_id
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "accounts",
+                    localField: "new_id",
+                    foreignField: "_id",
+                    pipeline: [
+                        {
+                            $project: {
+                                "wallet": 1,
+                                "phone": 1,
+                            }
+                        },
+                    ],
+                    as: "account",
+                }
+            },
+            {
+                $project: {
+                    "full_name": 1,
+                    "account": 1
+                }
+            },
         ])
 
+
+        let datas = []
+        datas.push(room)
+        datas.push(user)
         return { result: datas };
     } catch (error) {
         return { error: error.message };
@@ -174,5 +244,5 @@ export default class customerService {
     static getHotelList = getHotelList;
     static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
-    static getNotification = getNotification;
+    static getPreBill =getPreBill;
 }

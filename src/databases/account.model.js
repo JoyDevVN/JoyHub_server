@@ -26,6 +26,7 @@ const accountSchema = new Schema({
     wallet: {
         type: Number,
         required: false,
+        default: 0
     },
     phone: {
         type: String,
