@@ -1,7 +1,8 @@
 import modService from "../services/moderator.service.js"
 
 export const getRoomType = async (req, res) => {
-    const { result, error } = await modService.getRoomType();
+    const id = req.user.account_id;
+    const { result, error } = await modService.getRoomType(id);
     if (error) {
         return res.status(401).json({ message: error });
     }

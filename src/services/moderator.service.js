@@ -1,7 +1,22 @@
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
 import { Moderator } from "../databases/account.model.js";
 
-export const getRoomType = async () => {
+export const getRoomType = async (id) => {
+
+    // try {
+    //     const roomType = await RoomType.aggregate([
+    //         {
+    //             $match:
+    //             {
+    //                 hotel_id: id,
+    //             },
+    //         }
+    //     ])
+    //     return roomType
+    // } catch (error) {
+    //     return { error: error.message };
+    // }
+
     try {
         const roomType = await RoomType.find();
         return { result: roomType };
@@ -219,13 +234,50 @@ export const getHotelById = async (id) => {
 }
 
 export const getHotelRoomList = async (id) => {
-    const data = await Room.find({
-        hotel_id: id,
-    });
-    if (!data) {
-        return { error: `Invalid request` };
+    console.log(id)
+    let result = await Room.find({hotel_id: (id)})
+  
+
+    // let result = await Moderator.aggregate([
+    //     {
+    //         $lookup: {
+    //             from: "rooms",
+    //             localField: "account_id",
+    //             foreignField: "hotel_id",
+    //             as: "rooms",
+    //         },
+    //     },
+    //     {
+    //         $unwind: "$rooms",
+    //     },
+    //     {
+    //         $addFields: {
+    //             "rooms.type_id" : {$toObjectId: "$rooms.room_type_id"}
+    //         },
+
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "room_types",
+    //             localField: "rooms.type_id",
+    //             foreignField: "_id",
+    //             as: "room_type",
+    //         },
+    //     },
+    //     {
+    //         $match: {
+    //             account_id: id,
+    //         },
+    //     },
+
+    // ]);
+    console.log(result);
+    if (!result) {
+        return { error: "Internal error" };
     }
-    return { result: data };
+    return { result: result };
+
+
 }
 
 export const getHotelRoom = async (hotel_id, room_id) => {
@@ -253,6 +305,9 @@ export const getHotelRoom = async (hotel_id, room_id) => {
     }
     return { result: data };
 }
+
+
+
 
 export default class modService {
     // Room-type
