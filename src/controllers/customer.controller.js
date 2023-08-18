@@ -38,9 +38,29 @@ export const getPreBill = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getReservation = async (req, res) => {
+    const account_id = req.params.account_id;
+    const { result, error } = await customerService.getReservation(account_id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getRoomInfo = async (req, res) => {
+    const id = req.params.id;
+    const { result, error } = await customerService.getRoomInfo(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
 export default class customerController {
     static getHotelList = getHotelList;
     static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
     static getPreBill = getPreBill;
+    static getReservation = getReservation;
+    static getRoomInfo = getRoomInfo;
 }

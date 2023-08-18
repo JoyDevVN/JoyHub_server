@@ -1,7 +1,7 @@
 import joi from "joi";
 import jwt from "jsonwebtoken";
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
-import { Notification } from "../databases/notification.model.js";
+import { Booking } from "../databases/booking.model.js";
 import accountModel, { Customer, Moderator } from "../databases/account.model.js";
 import { ObjectId } from "mongoose";
 
@@ -240,9 +240,121 @@ export const getPreBill = async (room_id, account_id) => {
     }
 }
 
+export const getReservation = async (id) => {
+    try {
+        /*
+        let datas = await Booking.aggregate([
+            {
+                $addFields:
+                {
+                    new_hotel_id: { $toObjectId: "$hotel_id" }
+                }
+            },
+            {
+                $addFields:
+                {
+                    new_room_id: { $toObjectId: "$room_id" }
+                }
+            },
+            {   
+                $match: 
+                {
+                    account_id: id
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "hotel",
+                    localField: "new_hotel_id",
+                    foreignField: "_id",
+                    as: "hotel",
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "room",
+                    localField: "new_room_id",
+                    foreignField: "_id",
+                    as: "room",
+                }
+            }
+        ])
+        */
+        return { result: datas };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+export const getRoomInfo = async (id) => {
+    try {
+        /*
+        let datas = await Room.findById(id)
+        if (!datas) {
+            return { error: `Invalid request` };
+        }
+        */
+        let datas = await Room.aggregate([
+            {
+                $addFields:
+                {
+                    new_id: { $toString: "$_id" }
+                }
+            },
+            {   
+                $match: 
+                {
+                    new_id: id
+                }
+            },
+            {
+                $lookup:
+                {
+                    from: "room_amenity",
+                    localField: "new_id",
+                    foreignField: "room_id",
+                    pipeline: [
+                        {
+                            $lookup:
+                            {
+                                from: "amenity",
+                                localField: "amenity_id",
+                                foreignField: "amenity_id",
+                                pipeline: [
+                                    {
+                                        $project: {
+                                            "name": 1,
+                                            "account": 1
+                                        }
+                                    }
+                                ],
+                                as: "amenity",
+                            }
+                        },
+                        {
+                            $project: {
+                                "amenity": 1,
+                            }
+                        }
+                    ],
+                    as: "amenity_list",
+                }
+            },
+            
+        ])
+        return { result: datas };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
 export default class customerService {
     static getHotelList = getHotelList;
     static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
-    static getPreBill =getPreBill;
+    static getPreBill = getPreBill;
+    static getReservation = getReservation;
+    static getRoomInfo = getRoomInfo;
 }
