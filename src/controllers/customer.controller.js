@@ -26,8 +26,17 @@ export const getRoomAmenity = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getNotification = async (req, res) => {
+    const { result, error } = await customerService.getNotification();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
 export default class customerController {
     static getHotelList = getHotelList;
     static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
+    static getNotification = getNotification;
 }

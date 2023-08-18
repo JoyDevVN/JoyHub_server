@@ -4,8 +4,9 @@ import { verify } from "../controllers/auth.controller";
 
 const router = express.Router();
 
-router.get('/hotelList', customerController.getHotelList);
+router.get('/hotel_list', customerController.getHotelList);
 router.get('/hotel/:id', customerController.getHotelInfo);
 router.get('/room_amenity/:id', customerController.getRoomAmenity);
+router.get('/notification', customerController.getNotification);
 
 export default router;

@@ -8,6 +8,7 @@ import mongoose from 'mongoose';
 import authRouter from './routes/auth.route';
 // import connectDB from './configs/db.config';
 import modRouter from './routes/moderator.route';
+import customerRoute from './routes/customer.route';
 import adminRouter from './routes/admin.route';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -27,6 +28,7 @@ router.get('/', (req, res) => {
 app.use('/.netlify/functions/api/auth', authRouter);
 app.use('/.netlify/functions/api/mod', modRouter);
 // app.use('/.netlify/functions/api/booking', bookingRouter);
+app.use('/.netlify/functions/api/customer', customerRoute);
 app.use('/.netlify/functions/api/admin', adminRouter);
 app.use('/.netlify/functions/api', router);
 
