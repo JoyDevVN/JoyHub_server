@@ -1,6 +1,8 @@
 import joi from "joi";
-import db from "./db.service.js";
+import { Booking } from "../databases/booking.model.js";
+import { Notification } from "../databases/notification.model.js";
 import jwt from "jsonwebtoken";
+import { Account, Moderator } from "../databases/account.model.js";
 
 const bookingValidator = (data) => {
     const rule = joi.object({
@@ -46,14 +48,55 @@ export const getBookingListCustomer = async (bookingInfo) => {
 
 export const bookRoom = async (bookingInfo) => {
     try {
-        bookingValidator(bookingInfo);
-        const { data, error } = await db
-            .from("booking")
-            .insert(bookingInfo);
-        if (error) {
-            return { error: error.message };
+        // bookingValidator(bookingInfo);
+        // const { data, error } = await db
+        //     .from("booking")
+        //     .insert(bookingInfo);
+        // if (error) {
+        //     return { error: error.message };
+        // }
+        const customer = await Account.findById(bookingInfo.account_id);
+        if (!customer) {
+            return { error: "This customer does not exist" };
         }
-        return { result: `Inserted ${bookingInfo.booking_id} into booking` };
+
+        const hotel = await Moderator.findOne({ account_id: bookingInfo.hotel_id });
+        if (!hotel) {
+            return { error: "This hotel does not exist" };
+        }
+
+        const booking = new Booking({
+            hotel_id: bookingInfo.hotel_id,
+            room_id: bookingInfo.room_id,
+            room_type_id: bookingInfo.room_type_id,
+            account_id: bookingInfo.account_id,
+            check_in: new Date(bookingInfo.check_in),
+            check_out: new Date(bookingInfo.check_out),
+        });
+        const data = await booking.save();
+        if (!data) {
+            return { error: "Internal error" };
+        }
+
+
+
+        // create notification
+        const notification = new Notification({
+            booking_id: booking._id,
+            from_id: booking.account_id,
+            to_id: booking.hotel_id,
+            for: "moderator",
+            title: "New booking",
+            content: `New booking from ${customer.username}`,
+            status: "waiting",
+            room_id: booking.room_id
+        });
+        const notificationData = await notification.save();
+        if (!notificationData) {
+            return { error: "Internal error" };
+        }
+
+        return { result: `successful` };
     }
     catch (err) {
         return { error: err.message };

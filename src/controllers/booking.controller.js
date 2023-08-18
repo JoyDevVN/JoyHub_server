@@ -17,6 +17,7 @@ export const getBookingListCustomer= async (req, res) => {
 };
 
 export const bookRoom = async (req, res) => {
+    req.body.account_id = req.user.account_id;
     const { result, error } = await bookingService.bookRoom(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -97,7 +98,7 @@ export const deleteBill = async (req, res) => {
 };
 
 export default class bookingController {
-    // Booking 
+    // Booking
     static bookRoom = bookRoom;
     static updateBookingInfo = updateBookingInfo;
     static getBookingListCustomer = getBookingListCustomer;
@@ -109,7 +110,7 @@ export default class bookingController {
     static addBill = addBill
     static updateBill = updateBill
     static deleteBill = deleteBill
-    
+
     //Bill_detail
     static getBillDetailList = getBillDetailList
     static addBillDetail = addBillDetail

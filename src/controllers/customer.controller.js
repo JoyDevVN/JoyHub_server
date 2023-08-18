@@ -1,7 +1,17 @@
 import customerService from "../services/customer.service.js"
 
 export const getHotelList = async (req, res) => {
+    console.log("Getting hotel list")
     const { result, error } = await customerService.getHotelList();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+export const getNotificationList = async (req, res) => {
+    const id = req.user.account_id;
+    const { result, error } = await customerService.getNotificationList(id);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -63,4 +73,5 @@ export default class customerController {
     static getPreBill = getPreBill;
     static getReservation = getReservation;
     static getRoomInfo = getRoomInfo;
+    static getNotificationList = getNotificationList;
 }

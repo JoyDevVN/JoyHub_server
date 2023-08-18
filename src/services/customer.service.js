@@ -1,22 +1,30 @@
-import joi from "joi";
-import jwt from "jsonwebtoken";
 import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
-import { Booking } from "../databases/booking.model.js";
-import accountModel, { Customer, Moderator } from "../databases/account.model.js";
-import { ObjectId } from "mongoose";
+import { Customer, Moderator } from "../databases/account.model.js";
+import { Notification } from "../databases/notification.model.js";
 
 export const getHotelList = async () => {
     try {
-        let datas = await Moderator.aggregate([
+        let data = await Moderator.aggregate([
             {
-                $lookup: 
+                $match:
+                {
+                    isAccepted: true
+                }
+            },
+            {
+                $lookup:
                 {
                     from: "rooms",
                     localField: "account_id",
                     foreignField: "hotel_id",
                     pipeline: [
                         {
-                            $project: 
+                          $match: {
+                            isAcepeted: true,
+                          }
+                        },
+                        {
+                            $project:
                             {
                                 "price": 1
                             }
@@ -49,7 +57,7 @@ export const getHotelList = async () => {
                 }
             },
         ])
-        return { result: datas };
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
@@ -58,11 +66,12 @@ export const getHotelList = async () => {
 
 export const getHotelInfo = async (id) => {
     try {
-        let datas = await Moderator.aggregate([
-            {   
-                $match: 
+        let data = await Moderator.aggregate([
+            {
+                $match:
                 {
                     account_id: id,
+                    isAccepted: true
                 }
             },
             {
@@ -73,17 +82,23 @@ export const getHotelInfo = async (id) => {
                     foreignField: "hotel_id",
                     pipeline: [
                         {
+                            $match: {
+                                isAcepeted: true,
+                            }
+                        },
+                        {
                             $project: {
                                 "name": 1,
                                 "price": 1,
                                 "area": 1,
                                 "bedroom": 1,
                                 "guest": 1,
-                                "isAcepted": 1,
+                                "isAcepeted": 1,
                                 "isBooked": 1,
                                 "room_type": 1,
                             }
-                        },
+                        }
+
                     ],
                     as: "rooms",
                 },
@@ -107,7 +122,7 @@ export const getHotelInfo = async (id) => {
                 },
             },
         ])
-        return { result: datas };
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
@@ -115,15 +130,15 @@ export const getHotelInfo = async (id) => {
 
 export const getRoomAmenity = async (id) => {
     try {
-        let datas = await Room.aggregate([
+        let data = await Room.aggregate([
             {
                 $addFields:
                 {
                     new_id: { $toString: "$_id" }
                 }
             },
-            {   
-                $match: 
+            {
+                $match:
                 {
                     new_id: id
                 }
@@ -139,7 +154,7 @@ export const getRoomAmenity = async (id) => {
             }
         ])
 
-        return { result: datas };
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
@@ -148,8 +163,8 @@ export const getRoomAmenity = async (id) => {
 export const getPreBill = async (room_id, account_id) => {
     try {
         //let room = await Room.findById(room_id)
-        //let user = await Customer.findOne( {account_id: account_id})
-        
+        //let user = await Customer.findOne({account_id: account_id})
+
         let room = await Room.aggregate([
             {
                 $addFields:
@@ -157,8 +172,8 @@ export const getPreBill = async (room_id, account_id) => {
                     new_id: { $toString: "$_id" }
                 }
             },
-            {   
-                $match: 
+            {
+                $match:
                 {
                     new_id: room_id
                 }
@@ -199,8 +214,8 @@ export const getPreBill = async (room_id, account_id) => {
                     new_id: { $toObjectId: "$account_id" }
                 }
             },
-            {   
-                $match: 
+            {
+                $match:
                 {
                     account_id: account_id
                 }
@@ -231,10 +246,10 @@ export const getPreBill = async (room_id, account_id) => {
         ])
 
 
-        let datas = []
-        datas.push(room)
-        datas.push(user)
-        return { result: datas };
+        let data = []
+        data.push(room)
+        data.push(user)
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
@@ -243,7 +258,7 @@ export const getPreBill = async (room_id, account_id) => {
 export const getReservation = async (id) => {
     try {
         /*
-        let datas = await Booking.aggregate([
+        let data = await Booking.aggregate([
             {
                 $addFields:
                 {
@@ -256,8 +271,8 @@ export const getReservation = async (id) => {
                     new_room_id: { $toObjectId: "$room_id" }
                 }
             },
-            {   
-                $match: 
+            {
+                $match:
                 {
                     account_id: id
                 }
@@ -280,9 +295,12 @@ export const getReservation = async (id) => {
                     as: "room",
                 }
             }
-        ])
+        ]
+
+        );
         */
-        return { result: datas };
+        const data = "";
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
@@ -291,20 +309,20 @@ export const getReservation = async (id) => {
 export const getRoomInfo = async (id) => {
     try {
         /*
-        let datas = await Room.findById(id)
-        if (!datas) {
+        let data = await Room.findById(id)
+        if (!data) {
             return { error: `Invalid request` };
         }
         */
-        let datas = await Room.aggregate([
+        let data = await Room.aggregate([
             {
                 $addFields:
                 {
                     new_id: { $toString: "$_id" }
                 }
             },
-            {   
-                $match: 
+            {
+                $match:
                 {
                     new_id: id
                 }
@@ -325,6 +343,7 @@ export const getRoomInfo = async (id) => {
                                 pipeline: [
                                     {
                                         $project: {
+                                            "_id": 0,
                                             "name": 1,
                                             "account": 1
                                         }
@@ -334,7 +353,11 @@ export const getRoomInfo = async (id) => {
                             }
                         },
                         {
+                            $unwind: "$amenity"
+                        },
+                        {
                             $project: {
+                                "_id": 0,
                                 "amenity": 1,
                             }
                         }
@@ -342,16 +365,36 @@ export const getRoomInfo = async (id) => {
                     as: "amenity_list",
                 }
             },
-            
+
         ])
-        return { result: datas };
+        return { result: data };
     } catch (error) {
         return { error: error.message };
     }
 }
 
+export const getNotificationList = async (id) => {
+    const data = await Notification.find({ to_id: id })
+    .select({
+        _id: 1,
+        booking_id:1,
+        updated_at:1,
+        status:1,
+        title: 1,
+        content:1
+    })
+    .sort({ updated_at: -1 })
+    .lean();
+    if (!data) {
+        return { error: "Notification not found" };
+    }
+    return { result: data };
+}
+
+
 export default class customerService {
     static getHotelList = getHotelList;
+    static getNotificationList = getNotificationList;
     static getHotelInfo = getHotelInfo;
     static getRoomAmenity = getRoomAmenity;
     static getPreBill = getPreBill;

@@ -6,19 +6,19 @@ import logger from 'morgan';
 import mongoose from 'mongoose';
 // routes
 import authRouter from './routes/auth.route';
-// import connectDB from './configs/db.config';
 import modRouter from './routes/moderator.route';
-import customerRoute from './routes/customer.route';
+import customerRouter from './routes/customer.route';
 import adminRouter from './routes/admin.route';
 import dotenv from 'dotenv';
+
 dotenv.config();
-// import bookingRouter from './routes/booking.route';
 const router = Router();
 const app = express();
 // middleware
 app.use(json());
 app.use(urlencoded({ extended: false }));
 app.use(cors());
+app.use(logger('dev'));
 
 router.get('/', (req, res) => {
     console.log('Welcome to the JoyServe API');
@@ -28,8 +28,8 @@ router.get('/', (req, res) => {
 app.use('/.netlify/functions/api/auth', authRouter);
 app.use('/.netlify/functions/api/mod', modRouter);
 // app.use('/.netlify/functions/api/booking', bookingRouter);
-app.use('/.netlify/functions/api/customer', customerRoute);
 app.use('/.netlify/functions/api/admin', adminRouter);
+app.use('/.netlify/functions/api/customer', customerRouter);
 app.use('/.netlify/functions/api', router);
 
 mongoose.connect(process.env.MONGO_URL, {
@@ -47,6 +47,5 @@ export default app;
 const app_handler = serverless(app);
 
 export const handler = async (event, context) => {
-    const result = await app_handler(event, context);
-    return result;
+    return await app_handler(event, context);
 }
