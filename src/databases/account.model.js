@@ -70,6 +70,11 @@ const moderatorSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    image: {
+        // image url
+        type: String,
+        required: false,
+    },
 });
 
 export const Account = model("Account", accountSchema);

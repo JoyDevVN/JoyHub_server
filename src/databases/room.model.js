@@ -56,14 +56,6 @@ const roomSchema = new Schema({
         type: Boolean,
         default: false,
     },
-    name: {
-        type: String,
-        required: true,
-    },
-    hotel_id: {
-        type: String,
-        required: true,
-    },
     description: {
         type: String,
         required: false,
@@ -86,6 +78,10 @@ const roomSchema = new Schema({
     },
     area: {
         type: Number,
+        required: true,
+    },
+    image: {
+        type: String,
         required: true,
     },
 });
