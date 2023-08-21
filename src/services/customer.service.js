@@ -1,6 +1,6 @@
 import {Room, RoomAmenity} from "../databases/room.model.js";
 import {Customer, Moderator} from "../databases/account.model.js";
-import {Notification} from "../databases/notification.model.js";
+import {Notification, Rating} from "../databases/notification.model.js";
 import {Booking} from "../databases/booking.model.js";
 
 export const getHotelList = async () => {
@@ -55,6 +55,7 @@ export const getHotelList = async () => {
                     "address": 1,
                     "reviews": 1,
                     "rooms": 1,
+                    "hotel_id": "$account_id",
                 }
             },
         ])
@@ -64,8 +65,11 @@ export const getHotelList = async () => {
     }
 }
 
-
-export const getHotelInfo = async (id) => {
+// get hotel info with room list and review list
+// @param: id: hotel_id
+// @param: check_in: check in date in iso format
+// @param: check_out: check out date in iso format
+export const getHotelInfo = async (id, check_in, check_out) => {
     try {
         let data = await Moderator.aggregate([
             {
@@ -129,6 +133,56 @@ export const getHotelInfo = async (id) => {
                     },
             },
         ])
+        // check if each room in hotel is available
+        let bookings = await Booking.aggregate([
+            {
+                $match: {
+                    $and: [
+                        {
+                            check_in: {
+                                $lte: new Date(check_out)
+                            }
+                        },
+                        {
+                            check_out: {
+                                $gte: new Date(check_in)
+                            }
+                        },
+                        {
+                            status: {
+                                $in: ["approved", "completed"]
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    "room_id": 1,
+                }
+            }
+        ])
+        // mark room isBooked
+        data = data.map(
+            (item) => {
+                item.rooms = item.rooms.map(
+                    (room) => {
+                        let isBooked = false;
+                        bookings.forEach(
+                            (booking) => {
+                                if (booking.room_id === room._id) {
+                                    isBooked = true;
+                                }
+                            }
+                        )
+                        room.isBooked = isBooked;
+                        return room;
+                    }
+                )
+                return item;
+            }
+        )
+        console.log(JSON.stringify(bookings, null, 2));
         return {result: data};
     } catch (error) {
         return {error: error.message};
@@ -449,6 +503,31 @@ export const getNotificationList = async (id) => {
     return {result: data};
 }
 
+// add review from this customer to the hotel
+export const rating = async (booking_id, customer_id, star, comment) => {
+    try {
+        // check if this booking is completed
+        console.log(booking_id);
+        let booking = await Booking.findById(booking_id);
+        if (!booking) {
+            return {error: "Booking not found"};
+        }
+        if (booking.status !== "completed") {
+            return {error: "Booking is not completed"};
+        }
+        let review = new Rating({
+            hotel_id: booking.hotel_id,
+            room_id: booking.room_id,
+            customer_id: customer_id,
+            star: star,
+            content: comment,
+        })
+        await review.save();
+        return {result: "Rating success"};
+    } catch (error) {
+        return {error: error.message};
+    }
+}
 
 export default class customerService {
     static getHotelList = getHotelList;
@@ -458,4 +537,5 @@ export default class customerService {
     static getPreBill = getPreBill;
     static getReservation = getReservation;
     static getRoomInfo = getRoomInfo;
+    static rating = rating;
 }
