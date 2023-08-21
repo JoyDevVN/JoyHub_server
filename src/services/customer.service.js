@@ -114,6 +114,21 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         as: "rooms",
                     },
             },
+            {
+                $lookup: {
+                    from: "report",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    pipeline: [
+                        {
+                            $project: {
+                                "star": 1,
+                            }
+                        },
+                    ],
+                    as: "reviews"
+                }
+            },
             /*
             {
                 $lookup:
