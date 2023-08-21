@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { ObjectId, Schema, model } from "mongoose";
 
 const roomTypeSchema = new Schema({
     name: {
@@ -88,6 +88,9 @@ const roomSchema = new Schema({
         type: Number,
         required: true,
     },
+    image:{
+        type: Array,
+    }
 });
 
 const amenitySchema = new Schema({
@@ -95,9 +98,9 @@ const amenitySchema = new Schema({
         type: String,
         required: true,
     },
-    description: {
+    amenity_id: {
         type: String,
-        required: false,
+        required: true,
     },
 });
 
@@ -130,6 +133,7 @@ const roomImageSchema = new Schema({
         required: true,
     },
 });
+
 
 export const RoomType = model("room_type", roomTypeSchema);
 export const Room = model("room", roomSchema);

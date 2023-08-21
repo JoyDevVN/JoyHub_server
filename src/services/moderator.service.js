@@ -1,4 +1,4 @@
-import { RoomType, Room, RoomAmenity, RoomImage } from "../databases/room.model.js";
+import { RoomType, Room, RoomAmenity, RoomImage, AmenityModel } from "../databases/room.model.js";
 import { Moderator } from "../databases/account.model.js";
 
 export const getRoomType = async (id) => {
@@ -117,30 +117,14 @@ const roomValidator = (data) => {
     }
 }
 
-export const insertNewRoom = async (data) => {
+export const insertNewRoom = async (hotel_id, data) => {
     try {
-        // check if room type exist
-        const room_type = await RoomType.findOne({
-            name: data.room_type,
-            hotel_id: data.hotel_id
-        }).exec();
-        // Get id of room type
-        if (!room_type) {
-            return { error: `Invalid room type` };
+        try {
+            const result = await Room.create({...data,hotel_id: hotel_id});
+            console.log('Data inserted:', result.insertedId);
+        } catch (error) {
+            console.error('Error inserting data', error);
         }
-        data.room_type_id = room_type._id;
-        // console.log(JSON.stringify(data, null, 2));
-        // check if room exist
-        const alreadyExist = await Room.findOne({
-            name: data.name,
-            hotel_id: data.hotel_id,
-            room_type_id: data.room_type_id
-        }).exec();
-        if (alreadyExist) {
-            return { error: `Room already exist` };
-        }
-        const room = new Room(data);
-        await room.save();
         return { result: `Inserted ${data.name} into Room` };
     }
     catch (err) {
@@ -187,8 +171,9 @@ export const deleteRoom = async (data) => {
         //     return { error: error.message };
         // }
         // return { result: data };
+        console.log("REMOVE DATA: ",data["room_id"])
         const result = await Room.findOneAndDelete({
-            _id: data.room_id,
+            _id: data._id,
         });
         if (!result) {
             return { error: `Invalid request` };
@@ -234,7 +219,7 @@ export const getHotelById = async (id) => {
 }
 
 export const getHotelRoomList = async (id) => {
-    console.log(id)
+    //console.log(id)
     let result = await Room.find({hotel_id: (id)})
   
 
@@ -306,7 +291,24 @@ export const getHotelRoom = async (hotel_id, room_id) => {
     return { result: data };
 }
 
+export const getAllAmenity = async () => {
+    let data = await AmenityModel.find();
+    console.log(data)
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+  
+    return { result: data };
+}
 
+export const addAmenity = async () => {
+    let newAmenity = new AmenityModel({
+        name: "River",
+        amenity_id : "A12",
+    })
+    await newAmenity.save();
+ 
+}
 
 
 export default class modService {
@@ -325,5 +327,7 @@ export default class modService {
     static getHotelById = getHotelById;
     static getHotelRoomList = getHotelRoomList;
     static getHotelRoom = getHotelRoom;
-
+    //Amenity
+    static getAllAmenity = getAllAmenity;
+    static addAmenity  = addAmenity;
 }
