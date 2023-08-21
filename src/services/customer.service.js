@@ -73,15 +73,9 @@ export const getHotelInfo = async (id, check_in, check_out) => {
     try {
         let data = await Moderator.aggregate([
             {
-                $addFields:
-                    {
-                        new_id: {$toString: "$_id"}
-                    }
-            },
-            {
                 $match:
                     {
-                        new_id: id,
+                        account_id: id,
                         isAccepted: true
                     }
             },
@@ -150,25 +144,19 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                     },
             },
         ])
+        console.log(`Rooms: length: ${data[0].rooms.length}`)
         // check if each room in hotel is available
         let bookings = await Booking.aggregate([
             {
                 $match: {
                     $and: [
                         {
-                            check_in: {
-                                $lte: new Date(check_out)
-                            }
-                        },
-                        {
-                            check_out: {
-                                $gte: new Date(check_in)
-                            }
-                        },
-                        {
                             status: {
-                                $in: ["approved", "completed"]
+                                $in: ["approved", "waiting"]
                             }
+                        },
+                        {
+                            hotel_id: id
                         }
                     ]
                 }
@@ -176,6 +164,8 @@ export const getHotelInfo = async (id, check_in, check_out) => {
             {
                 $project: {
                     "room_id": 1,
+                    "check_in": 1,
+                    "check_out": 1,
                 }
             }
         ])
@@ -187,8 +177,23 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         let isBooked = false;
                         bookings.forEach(
                             (booking) => {
-                                if (booking.room_id === room._id) {
-                                    isBooked = true;
+                                check_in = new Date(check_in);
+                                check_out = new Date(check_out);
+                                // booking.check_in = new Date(booking.check_in);
+                                // booking.check_out = new Date(booking.check_out);
+                                if (booking.room_id === room._id.toString()) {
+                                    if (check_in <= booking.check_out && check_out >= booking.check_in) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in <= booking.check_in && check_out >= booking.check_out) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in >= booking.check_in && check_out <= booking.check_out) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in <= booking.check_in && check_out <= booking.check_out) {
+                                        isBooked = true;
+                                    }
                                 }
                             }
                         )
