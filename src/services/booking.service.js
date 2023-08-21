@@ -292,6 +292,48 @@ export const deleteBill = async (bill) => {
     }
 }
 
+export const addMoney = async (accountInfo) => {
+    try {
+        // only update which data requested
+        let curMoney = await Account.aggregate([
+            {
+                $addFields:
+                    {
+                        new_id: {$toString: "$_id"}
+                    }
+            },
+            {
+                $match: 
+                {
+                    new_id: accountInfo.account_id
+                }
+            },
+            {
+                $project: {
+                    "wallet": 1,
+                }
+            }
+        ])
+        let newMoney = parseInt(curMoney[0].wallet) + parseInt(accountInfo.money)
+        const result = await Account.findOneAndUpdate(
+            {
+                _id: accountInfo.account_id,
+            },
+            {
+                wallet: newMoney
+            },
+            { new: true }
+        );
+        if (!result) {
+            return { error: error };
+        }
+        return { result: `successful` };
+    }
+    catch (err) {
+        return { error: err.message };
+    }
+}
+
 export default class bookingService {
     // Book room
     static bookRoom = bookRoom
@@ -310,4 +352,7 @@ export default class bookingService {
     static getBillDetailList = getBillDetailList
     static addBillDetail = addBillDetail
     static deleteBillDetail = deleteBillDetail
+
+    // Money
+    static addMoney = addMoney
 }

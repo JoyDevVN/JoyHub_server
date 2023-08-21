@@ -97,6 +97,15 @@ export const deleteBill = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const addMoney = async (req, res) => {
+    req.body.account_id = "64ddff79df3bc0763ba06d52";
+    const { result, error } = await bookingService.addMoney(req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
 export default class bookingController {
     // Booking
     static bookRoom = bookRoom;
@@ -115,4 +124,8 @@ export default class bookingController {
     static getBillDetailList = getBillDetailList
     static addBillDetail = addBillDetail
     static deleteBillDetail = deleteBillDetail
+
+    //money
+    static addMoney = addMoney
+
 }

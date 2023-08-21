@@ -380,13 +380,7 @@ export const getPreBill = async (room_id, account_id) => {
                 }
             },
         ])
-
-        /*
-        let data = []
-        data.push(room)
-        data.push(user)
-        */
-       let data = {room, user}
+        let data = {room, user}
         return {result: data};
     } catch (error) {
         return {error: error.message};
