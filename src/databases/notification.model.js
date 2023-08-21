@@ -68,7 +68,7 @@ const reportSchema = new Schema({
 });
 
 const ratingSchema = new Schema({
-    account_id: {
+    customer_id: {
         type: String,
         required: true,
     },
@@ -76,8 +76,8 @@ const ratingSchema = new Schema({
         type: String,
         required: true,
     },
-    rating: {
-        type: Number,
+    room_id: {
+        type: String,
         required: true,
     },
     content: {
@@ -88,6 +88,13 @@ const ratingSchema = new Schema({
         type: Date,
         default: Date.now(),
     },
+    updated_at: {
+        type: Date,
+    },
+    star: {
+        type: Number,
+        default: 0,
+    },
 });
 
 notificationSchema.pre('save', function (next) {
@@ -96,6 +103,11 @@ notificationSchema.pre('save', function (next) {
 });
 
 reportSchema.pre('save', function (next) {
+    this.update({}, { $set: { updated_at: new Date() } });
+    next();
+});
+
+ratingSchema.pre('save', function (next) {
     this.update({}, { $set: { updated_at: new Date() } });
     next();
 });

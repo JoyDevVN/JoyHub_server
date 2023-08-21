@@ -10,11 +10,12 @@ router.get('/', (req, res) => {
 });
 
 router.get('/hotel', customerController.getHotelList);
-router.get('/hotel/:id', customerController.getHotelInfo);
+router.post('/hotel/:id', customerController.getHotelInfo);
 router.get('/room/:id', customerController.getRoomInfo);
 router.get('/room_amenity/:id', customerController.getRoomAmenity);
 router.get('/getPreBill/:room_id/:account_id', customerController.getPreBill);
 router.get('/getReservation/:account_id', customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
+router.post('/rating', verify, customerController.rating);
 
 export default router;

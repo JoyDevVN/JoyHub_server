@@ -63,6 +63,7 @@ const login = async (data) => {
         if (!validPassword) {
             return { result: null, token: null, role: null, error: "Password is not correct" };
         }
+        console.log(`[INFO] Login successfully`);
         // create and assign token
         const token = jwt.sign({account_id: account._id, role: account.role }, process.env.TOKEN_SECRET, { expiresIn: "24h" });
         return { result: "Login successfully", token: token, role: account.role, error: null };
