@@ -1,6 +1,6 @@
 import {Room, RoomAmenity} from "../databases/room.model.js";
 import {Customer, Moderator} from "../databases/account.model.js";
-import {Notification} from "../databases/notification.model.js";
+import {Notification, Rating} from "../databases/notification.model.js";
 import {Booking} from "../databases/booking.model.js";
 
 export const getHotelList = async () => {
@@ -27,7 +27,8 @@ export const getHotelList = async () => {
                             {
                                 $project:
                                     {
-                                        "price": 1
+                                        "price": 1,
+                                        "image": 1
                                     }
                             }
                         ],
@@ -55,6 +56,8 @@ export const getHotelList = async () => {
                     "address": 1,
                     "reviews": 1,
                     "rooms": 1,
+                    "hotel_id": "$account_id",
+                    "image": 1,
                 }
             },
         ])
@@ -64,14 +67,23 @@ export const getHotelList = async () => {
     }
 }
 
-
-export const getHotelInfo = async (id) => {
+// get hotel info with room list and review list
+// @param: id: hotel_id
+// @param: check_in: check in date in iso format
+// @param: check_out: check out date in iso format
+export const getHotelInfo = async (id, check_in, check_out) => {
     try {
         let data = await Moderator.aggregate([
             {
+                $addFields:
+                    {
+                        new_id: {$toString: "$_id"}
+                    }
+            },
+            {
                 $match:
                     {
-                        account_id: id,
+                        new_id: id,
                         isAccepted: true
                     }
             },
@@ -83,9 +95,53 @@ export const getHotelInfo = async (id) => {
                         foreignField: "hotel_id",
                         pipeline: [
                             {
+                                $addFields:
+                                    {
+                                        new_id: {$toString: "$_id"}
+                                    }
+                            },
+                            {
                                 $match: {
                                     isAcepeted: true,
                                 }
+                            },
+                            {
+                                $lookup:
+                                    {
+                                        from: "room_amenity",
+                                        localField: "new_id",
+                                        foreignField: "room_id",
+                                        pipeline: [
+                                            {
+                                                $lookup:
+                                                    {
+                                                        from: "amenities",
+                                                        localField: "amenity_id",
+                                                        foreignField: "amenity_id",
+                                                        pipeline: [
+                                                            {
+                                                                $project: {
+                                                                    "_id": 0,
+                                                                    "name": 1,
+                                                                    "account": 1
+                                                                }
+                                                            }
+                                                        ],
+                                                        as: "amenity",
+                                                    }
+                                            },
+                                            {
+                                                $unwind: "$amenity"
+                                            },
+                                            {
+                                                $project: {
+                                                    "_id": 0,
+                                                    "amenity": 1,
+                                                }
+                                            }
+                                        ],
+                                        as: "amenity_list",
+                                    }
                             },
                             {
                                 $project: {
@@ -97,6 +153,7 @@ export const getHotelInfo = async (id) => {
                                     "isAcepeted": 1,
                                     "isBooked": 1,
                                     "room_type": 1,
+                                    "amenity_list": 1,
                                 }
                             }
 
@@ -105,24 +162,102 @@ export const getHotelInfo = async (id) => {
                     },
             },
             {
-                $lookup:
-                    {
-                        from: "report",
-                        localField: "account_id",
-                        foreignField: "hotel_id",
-                        pipeline: [
-                            {
-                                $project: {
-                                    "customer_id": 1,
-                                    "comment": 1,
-                                    "star": 1,
+                $lookup: {
+                    from: "report",
+                    localField: "account_id",
+                    foreignField: "hotel_id",
+                    pipeline: [
+                        {
+                            $lookup:
+                                {
+                                    from: "customers",
+                                    localField: "customer_id",
+                                    foreignField: "account_id",
+                                    pipeline: [
+                                        {
+                                            $project:
+                                                {
+                                                    "full_name": 1,
+                                                }
+                                        }
+                                    ],
+                                    as: "customer"
                                 }
-                            },
-                        ],
-                        as: "review",
-                    },
+                        },
+                        {
+                            $project: {
+                                "star": 1,
+                                "customer": 1,
+                                "comment": 1,
+
+                            }
+                        },
+                    ],
+                    as: "reviews"
+                }
             },
         ])
+        //console.log(`Rooms: length: ${data[0].rooms.length}`)
+        // check if each room in hotel is available
+        let bookings = await Booking.aggregate([
+            {
+                $match: {
+                    $and: [
+                        {
+                            status: {
+                                $in: ["approved", "waiting"]
+                            }
+                        },
+                        {
+                            hotel_id: id
+                        }
+                    ]
+                }
+            },
+            {
+                $project: {
+                    "room_id": 1,
+                    "check_in": 1,
+                    "check_out": 1,
+                }
+            }
+        ])
+        // mark room isBooked
+        data = data.map(
+            (item) => {
+                item.rooms = item.rooms.map(
+                    (room) => {
+                        let isBooked = false;
+                        bookings.forEach(
+                            (booking) => {
+                                check_in = new Date(check_in);
+                                check_out = new Date(check_out);
+                                // booking.check_in = new Date(booking.check_in);
+                                // booking.check_out = new Date(booking.check_out);
+                                if (booking.room_id === room._id.toString()) {
+                                    if (check_in <= booking.check_out && check_out >= booking.check_in) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in <= booking.check_in && check_out >= booking.check_out) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in >= booking.check_in && check_out <= booking.check_out) {
+                                        isBooked = true;
+                                    }
+                                    else if (check_in <= booking.check_in && check_out <= booking.check_out) {
+                                        isBooked = true;
+                                    }
+                                }
+                            }
+                        )
+                        room.isBooked = isBooked;
+                        return room;
+                    }
+                )
+                return item;
+            }
+        )
+        // console.log(JSON.stringify(bookings, null, 2));
         return {result: data};
     } catch (error) {
         return {error: error.message};
@@ -148,7 +283,7 @@ export const getRoomAmenity = async (id) => {
                 $lookup:
                     {
                         from: "room_amenity",
-                        localField: "_id",
+                        localField: "new_id",
                         foreignField: "room_id",
                         as: "room_amenity",
                     }
@@ -389,7 +524,7 @@ export const getRoomInfo = async (id) => {
                             {
                                 $lookup:
                                     {
-                                        from: "amenity",
+                                        from: "amenities",
                                         localField: "amenity_id",
                                         foreignField: "amenity_id",
                                         pipeline: [
@@ -443,6 +578,31 @@ export const getNotificationList = async (id) => {
     return {result: data};
 }
 
+// add review from this customer to the hotel
+export const rating = async (booking_id, customer_id, star, comment) => {
+    try {
+        // check if this booking is completed
+        console.log(booking_id);
+        let booking = await Booking.findById(booking_id);
+        if (!booking) {
+            return {error: "Booking not found"};
+        }
+        if (booking.status !== "completed") {
+            return {error: "Booking is not completed"};
+        }
+        let review = new Rating({
+            hotel_id: booking.hotel_id,
+            room_id: booking.room_id,
+            customer_id: customer_id,
+            star: star,
+            content: comment,
+        })
+        await review.save();
+        return {result: "Rating success"};
+    } catch (error) {
+        return {error: error.message};
+    }
+}
 
 export default class customerService {
     static getHotelList = getHotelList;
@@ -452,4 +612,5 @@ export default class customerService {
     static getPreBill = getPreBill;
     static getReservation = getReservation;
     static getRoomInfo = getRoomInfo;
+    static rating = rating;
 }

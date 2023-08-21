@@ -68,7 +68,6 @@ export const bookRoom = async (bookingInfo) => {
         const booking = new Booking({
             hotel_id: bookingInfo.hotel_id,
             room_id: bookingInfo.room_id,
-            room_type_id: bookingInfo.room_type_id,
             account_id: bookingInfo.account_id,
             check_in: new Date(bookingInfo.check_in),
             check_out: new Date(bookingInfo.check_out),

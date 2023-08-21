@@ -13,7 +13,6 @@ export const registerAccount = async (req, res) => {
 }
 
 export const loginAccount = async (req, res) => {
-    // const {username, password} = req.body;
     const { result, token, error, role } = await authService.login(req.body);
     if (error) {
         return res.status(401).json({
