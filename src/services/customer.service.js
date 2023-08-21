@@ -152,7 +152,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
             },
             */
         ])
-        console.log(`Rooms: length: ${data[0].rooms.length}`)
+        //console.log(`Rooms: length: ${data[0].rooms.length}`)
         // check if each room in hotel is available
         let bookings = await Booking.aggregate([
             {
