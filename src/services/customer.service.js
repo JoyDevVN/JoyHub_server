@@ -132,6 +132,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         as: "review",
                     },
             },
+            /*
             {
                 $lookup:
                     {
@@ -149,6 +150,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         as: "booking",
                     },
             },
+            */
         ])
         // check if each room in hotel is available
         let bookings = await Booking.aggregate([
@@ -225,7 +227,7 @@ export const getRoomAmenity = async (id) => {
                 $lookup:
                     {
                         from: "room_amenity",
-                        localField: "_id",
+                        localField: "new_id",
                         foreignField: "room_id",
                         as: "room_amenity",
                     }
