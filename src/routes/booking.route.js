@@ -38,6 +38,5 @@ router.delete('/bill_detail', verify, bookingController.deleteBillDetail);
 router.get('/test', (req, res) => {
     res.json({ message: "test" });
 });
-console.log(router)
 
 export default router;

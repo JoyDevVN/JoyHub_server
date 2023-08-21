@@ -8,15 +8,7 @@ const bookingSchema = new Schema({
         type: String,
         required: true,
     },
-    room_type_id: {
-        type: String,
-        required: true,
-    },
     account_id: {
-        type: String,
-        required: true,
-    },
-    room_type_id: {
         type: String,
         required: true,
     },
@@ -38,6 +30,11 @@ const bookingSchema = new Schema({
     isCanceled: {
         type: Boolean,
         default: false,
+    },
+    status: {
+        type: String,
+        enum: ["waiting", "approved", "rejected", "canceled", "completed"],
+        default: "waiting",
     },
 });
 

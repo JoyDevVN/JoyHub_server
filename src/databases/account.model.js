@@ -26,6 +26,7 @@ const accountSchema = new Schema({
     wallet: {
         type: Number,
         required: false,
+        default: 0
     },
     phone: {
         type: String,
@@ -68,6 +69,11 @@ const moderatorSchema = new Schema({
     isAccepted: {
         type: Boolean,
         default: false,
+    },
+    image: {
+        // image url
+        type: String,
+        required: false,
     },
 });
 
