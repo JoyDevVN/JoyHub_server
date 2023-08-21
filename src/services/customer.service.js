@@ -27,7 +27,8 @@ export const getHotelList = async () => {
                             {
                                 $project:
                                     {
-                                        "price": 1
+                                        "price": 1,
+                                        "image": 1
                                     }
                             }
                         ],
@@ -56,6 +57,7 @@ export const getHotelList = async () => {
                     "reviews": 1,
                     "rooms": 1,
                     "hotel_id": "$account_id",
+                    "image": 1,
                 }
             },
         ])
