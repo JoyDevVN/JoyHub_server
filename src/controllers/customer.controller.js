@@ -39,7 +39,7 @@ export const getRoomAmenity = async (req, res) => {
 
 export const getPreBill = async (req, res) => {
     const room_id = req.params.room_id;
-    const account_id = req.params.account_id;
+    const account_id = req.user.account_id;
     console.log(room_id)
     console.log(account_id)
     const { result, error } = await customerService.getPreBill(room_id, account_id);
@@ -50,7 +50,7 @@ export const getPreBill = async (req, res) => {
 };
 
 export const getReservation = async (req, res) => {
-    const account_id = req.params.account_id;
+    const account_id = req.user.account_id;
     const { result, error } = await customerService.getReservation(account_id);
     if (error) {
         return res.status(401).json({ message: error });
