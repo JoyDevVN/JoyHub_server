@@ -69,9 +69,15 @@ export const getHotelInfo = async (id) => {
     try {
         let data = await Moderator.aggregate([
             {
+                $addFields:
+                    {
+                        new_id: {$toString: "$_id"}
+                    }
+            },
+            {
                 $match:
                     {
-                        account_id: id,
+                        new_id: id,
                         isAccepted: true
                     }
             },
