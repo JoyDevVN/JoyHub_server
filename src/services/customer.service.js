@@ -44,7 +44,7 @@ export const getHotelList = async () => {
                         {
                             $lookup:
                                 {
-                                    from: "customer",
+                                    from: "customers",
                                     localField: "customer_id",
                                     foreignField: "account_id",
                                     pipeline: [
