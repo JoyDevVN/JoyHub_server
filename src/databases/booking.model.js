@@ -27,6 +27,14 @@ const bookingSchema = new Schema({
     updated_at: {
         type: Date,
     },
+    date_begin: {
+        type: Date,
+        default: false,
+    },
+    date_end: {
+        type: Date,
+        default: false,
+    },
     isCanceled: {
         type: Boolean,
         default: false,

@@ -128,6 +128,23 @@ export const getHotelInfo = async (id) => {
                         as: "review",
                     },
             },
+            {
+                $lookup:
+                    {
+                        from: "bookings",
+                        localField: "account_id",
+                        foreignField: "hotel_id",
+                        pipeline: [
+                            {
+                                $project: {
+                                    "date_begin": 1,
+                                    "date_end": 1,
+                                }
+                            },
+                        ],
+                        as: "booking",
+                    },
+            },
         ])
         return {result: data};
     } catch (error) {
