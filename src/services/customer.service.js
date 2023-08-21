@@ -114,6 +114,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         as: "rooms",
                     },
             },
+            /*
             {
                 $lookup:
                     {
@@ -130,24 +131,6 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                             },
                         ],
                         as: "review",
-                    },
-            },
-            /*
-            {
-                $lookup:
-                    {
-                        from: "bookings",
-                        localField: "account_id",
-                        foreignField: "hotel_id",
-                        pipeline: [
-                            {
-                                $project: {
-                                    "date_begin": 1,
-                                    "date_end": 1,
-                                }
-                            },
-                        ],
-                        as: "booking",
                     },
             },
             */
@@ -212,7 +195,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                 return item;
             }
         )
-        console.log(JSON.stringify(bookings, null, 2));
+        // console.log(JSON.stringify(bookings, null, 2));
         return {result: data};
     } catch (error) {
         return {error: error.message};
