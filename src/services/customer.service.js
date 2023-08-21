@@ -178,7 +178,6 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                                             $project:
                                                 {
                                                     "full_name": 1,
-                                                    "comment": 1,
                                                 }
                                         }
                                     ],
@@ -188,7 +187,9 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         {
                             $project: {
                                 "star": 1,
-                                "customer": 1
+                                "customer": 1,
+                                "comment": 1,
+
                             }
                         },
                     ],
