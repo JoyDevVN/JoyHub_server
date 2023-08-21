@@ -46,4 +46,11 @@ router.get('/verify', verify, modController.verifyMod, (req, res) => {
     res.json({ message: "verify" });
 });
 
+
+//amenity route
+router.get('/amenity',verify, modController.verifyMod, modController.getAllAmenity);
+
+router.post('/amenity', modController.addAmenity);
+
+
 export default router;

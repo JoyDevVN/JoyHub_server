@@ -45,8 +45,9 @@ export const getRoomInfo = async (req, res) => {
 };
 
 export const insertNewRoom = async (req, res) => {
-    req.body.hotel_id = req.user.account_id;
-    const { result, error } = await modService.insertNewRoom(req.body);
+    const id = req.user.account_id;
+    console.log("BODY ADD:",req.body)
+    const { result, error } = await modService.insertNewRoom(id,req.body);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -63,6 +64,7 @@ export const updateRoomInfo = async (req, res) => {
 };
 
 export const deleteRoom = async (req, res) => {
+    console.log("RESBODY",req.body)
     const { result, error } = await modService.deleteRoom(req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -109,6 +111,24 @@ export const getHotelRoom = async (req, res) => {
     res.status(200).json({ message: result });
 };
 
+export const getAllAmenity = async (req, res) => {
+
+    const { result, error } = await modService.getAllAmenity();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
+
+export const addAmenity = async (req, res) => {
+
+    const { result, error } = await modService.addAmenity();
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
+
 export default class modController {
     static verifyMod = verifyMod;
     // Room-type
@@ -125,6 +145,7 @@ export default class modController {
     static getHotelById = getHotelById;
     static getHotelRoomList = getHotelRoomList;
     static getHotelRoom = getHotelRoom;
-
-
+    //Amenity
+    static getAllAmenity = getAllAmenity;
+    static addAmenity = addAmenity;
 }
