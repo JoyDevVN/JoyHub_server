@@ -46,7 +46,6 @@ export const getRoomInfo = async (req, res) => {
 
 export const insertNewRoom = async (req, res) => {
     const id = req.user.account_id;
-    console.log("BODY ADD:",req.body)
     const { result, error } = await modService.insertNewRoom(id,req.body);
     if (error) {
         return res.status(401).json({ message: error });
@@ -64,7 +63,6 @@ export const updateRoomInfo = async (req, res) => {
 };
 
 export const deleteRoom = async (req, res) => {
-    console.log("RESBODY",req.body)
     const { result, error } = await modService.deleteRoom(req.body);
     if (error) {
         return res.status(401).json({ message: error });

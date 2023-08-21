@@ -117,11 +117,28 @@ const roomValidator = (data) => {
     }
 }
 
+
+const insertNewRoomAmenity = async (data, roomid) => {
+
+    try {
+        for (let i = 0; i < data.length; ++i) {
+            console.log("AMDATA:" + data[i] + "ID" + roomid)
+            await RoomAmenity.create({ amenity_id: data[i]["amenity_id"], room_id: roomid });
+        }
+
+    } catch (err) {
+        return { error: err.message };
+    }
+
+}
+
 export const insertNewRoom = async (hotel_id, data) => {
+    const { chosenAmenities, ...roomData } = data
+
     try {
         try {
-            const result = await Room.create({...data,hotel_id: hotel_id});
-            console.log('Data inserted:', result.insertedId);
+            const result = await Room.create({ ...roomData, hotel_id: hotel_id });
+            await insertNewRoomAmenity(chosenAmenities, result._id)
         } catch (error) {
             console.error('Error inserting data', error);
         }
@@ -171,7 +188,7 @@ export const deleteRoom = async (data) => {
         //     return { error: error.message };
         // }
         // return { result: data };
-        console.log("REMOVE DATA: ",data["room_id"])
+        console.log("REMOVE DATA: ", data["room_id"])
         const result = await Room.findOneAndDelete({
             _id: data._id,
         });
@@ -220,8 +237,46 @@ export const getHotelById = async (id) => {
 
 export const getHotelRoomList = async (id) => {
     //console.log(id)
-    let result = await Room.find({hotel_id: (id)})
-  
+    //let result = await Room.find({hotel_id: (id)})
+
+    let result = await Room.aggregate([
+        {
+            $addFields: {
+                'roomId': {$toString: '$_id'}
+            }
+        }, {
+            $lookup: {
+                from: 'room_amenities', 
+                localField: 'roomId', 
+                foreignField: 'room_id', 
+                as: 'amenities'
+            }
+        }, {
+            $lookup: {
+                from: 'amenities', 
+                localField: 'amenities.amenity_id', 
+                foreignField: 'amenity_id', 
+                as: 'amenitiesInfo'
+            }
+        }, {
+            $project: {
+                _id: 1 ,
+                name: 1 ,
+                room_type: 1 ,
+                bedroom: 1 ,
+                area: 1 ,
+                description: 1 ,
+                bathroom: 1 ,
+                isAccepted: 1 ,
+                isBooked: 1 ,
+                price: 1 ,
+                guest: 1 ,
+                image: 1 ,
+                chosenAmenities: 1, 
+                amenities: '$amenitiesInfo'
+            }
+        }
+    ])
 
     // let result = await Moderator.aggregate([
     //     {
@@ -297,17 +352,17 @@ export const getAllAmenity = async () => {
     if (!data) {
         return { error: `Invalid request` };
     }
-  
+
     return { result: data };
 }
 
 export const addAmenity = async () => {
     let newAmenity = new AmenityModel({
         name: "River",
-        amenity_id : "A12",
+        amenity_id: "A12",
     })
     await newAmenity.save();
- 
+
 }
 
 
@@ -329,5 +384,5 @@ export default class modService {
     static getHotelRoom = getHotelRoom;
     //Amenity
     static getAllAmenity = getAllAmenity;
-    static addAmenity  = addAmenity;
+    static addAmenity = addAmenity;
 }

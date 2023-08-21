@@ -101,10 +101,6 @@ const roomAmenitySchema = new Schema({
         type: String,
         required: true,
     },
-    hotel_id: {
-        type: String,
-        required: true,
-    },
     amenity_id: {
         type: String,
         required: true,
