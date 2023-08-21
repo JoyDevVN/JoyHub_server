@@ -42,26 +42,8 @@ export const getHotelList = async () => {
                     foreignField: "hotel_id",
                     pipeline: [
                         {
-                            $lookup:
-                                {
-                                    from: "customers",
-                                    localField: "customer_id",
-                                    foreignField: "account_id",
-                                    pipeline: [
-                                        {
-                                            $project:
-                                                {
-                                                    "full_name": 1,
-                                                }
-                                        }
-                                    ],
-                                    as: "customer"
-                                }
-                        },
-                        {
                             $project: {
                                 "star": 1,
-                                "customer": 1,
                             }
                         },
                     ],
@@ -113,9 +95,53 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                         foreignField: "hotel_id",
                         pipeline: [
                             {
+                                $addFields:
+                                    {
+                                        new_id: {$toString: "$_id"}
+                                    }
+                            },
+                            {
                                 $match: {
                                     isAcepeted: true,
                                 }
+                            },
+                            {
+                                $lookup:
+                                    {
+                                        from: "room_amenity",
+                                        localField: "new_id",
+                                        foreignField: "room_id",
+                                        pipeline: [
+                                            {
+                                                $lookup:
+                                                    {
+                                                        from: "amenities",
+                                                        localField: "amenity_id",
+                                                        foreignField: "amenity_id",
+                                                        pipeline: [
+                                                            {
+                                                                $project: {
+                                                                    "_id": 0,
+                                                                    "name": 1,
+                                                                    "account": 1
+                                                                }
+                                                            }
+                                                        ],
+                                                        as: "amenity",
+                                                    }
+                                            },
+                                            {
+                                                $unwind: "$amenity"
+                                            },
+                                            {
+                                                $project: {
+                                                    "_id": 0,
+                                                    "amenity": 1,
+                                                }
+                                            }
+                                        ],
+                                        as: "amenity_list",
+                                    }
                             },
                             {
                                 $project: {
@@ -127,6 +153,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                                     "isAcepeted": 1,
                                     "isBooked": 1,
                                     "room_type": 1,
+                                    "amenity_list": 1,
                                 }
                             }
 
@@ -141,34 +168,33 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                     foreignField: "hotel_id",
                     pipeline: [
                         {
+                            $lookup:
+                                {
+                                    from: "customers",
+                                    localField: "customer_id",
+                                    foreignField: "account_id",
+                                    pipeline: [
+                                        {
+                                            $project:
+                                                {
+                                                    "full_name": 1,
+                                                    "comment": 1,
+                                                }
+                                        }
+                                    ],
+                                    as: "customer"
+                                }
+                        },
+                        {
                             $project: {
                                 "star": 1,
+                                "customer": 1
                             }
                         },
                     ],
                     as: "reviews"
                 }
             },
-            /*
-            {
-                $lookup:
-                    {
-                        from: "report",
-                        localField: "account_id",
-                        foreignField: "hotel_id",
-                        pipeline: [
-                            {
-                                $project: {
-                                    "customer_id": 1,
-                                    "comment": 1,
-                                    "star": 1,
-                                }
-                            },
-                        ],
-                        as: "review",
-                    },
-            },
-            */
         ])
         //console.log(`Rooms: length: ${data[0].rooms.length}`)
         // check if each room in hotel is available
@@ -497,7 +523,7 @@ export const getRoomInfo = async (id) => {
                             {
                                 $lookup:
                                     {
-                                        from: "amenity",
+                                        from: "amenities",
                                         localField: "amenity_id",
                                         foreignField: "amenity_id",
                                         pipeline: [
