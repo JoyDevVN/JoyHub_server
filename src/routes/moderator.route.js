@@ -20,7 +20,7 @@ router.post('/room', verify, modController.verifyMod, modController.insertNewRoo
 // req.body: { hotel_id, room_id, room_type_id, name, number_of_guest, number_of_bedroom, number_of_bathroom, area, price}
 router.put('/room', verify, modController.verifyMod, modController.updateRoomInfo);
 // req.body: { hotel_id, room_id, room_type_id,}
-router.delete('/room', verify, modController.verifyMod, modController.deleteRoom);
+router.delete('/room/:id', verify, modController.verifyMod, modController.deleteRoom);
 
 /// /api/mod/hotel_list
 /// req.body: {  }

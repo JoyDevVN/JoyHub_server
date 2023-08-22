@@ -178,19 +178,11 @@ export const updateRoomInfo = async (data) => {
     }
 }
 
-export const deleteRoom = async (data) => {
+export const deleteRoom = async (id) => {
     try {
-        // const { data, error } = await db
-        //     .from("room")
-        //     .delete()
-        //     .eq("room_id", data.room_id).eq("room_type_id", data.room_type_id).eq("hotel_id", data.hotel_id)
-        // if (error) {
-        //     return { error: error.message };
-        // }
-        // return { result: data };
-        console.log("REMOVE DATA: ", data["room_id"])
+    
         const result = await Room.findOneAndDelete({
-            _id: data._id,
+            _id: id,
         });
         if (!result) {
             return { error: `Invalid request` };

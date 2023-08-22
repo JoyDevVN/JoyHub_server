@@ -63,8 +63,8 @@ export const updateRoomInfo = async (req, res) => {
 };
 
 export const deleteRoom = async (req, res) => {
-    console.log(res.body)
-    const { result, error } = await modService.deleteRoom(req.body);
+    const id = req.params.id;
+    const { result, error } = await modService.deleteRoom(id);
     if (error) {
         return res.status(401).json({ message: error });
     }
