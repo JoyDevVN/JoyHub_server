@@ -463,6 +463,11 @@ export const getReservation = async (id) => {
                         "status": 1,
                         "updated_at": 1,
                     }
+                },
+                {
+                    $sort: {
+                        updated_at: -1,
+                    }
                 }
             ]
         )
