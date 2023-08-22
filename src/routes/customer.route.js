@@ -13,9 +13,10 @@ router.get('/hotel', customerController.getHotelList);
 router.post('/hotel/:id', customerController.getHotelInfo);
 router.get('/room/:id', customerController.getRoomInfo);
 router.get('/room_amenity/:id', customerController.getRoomAmenity);
-router.get('/getPreBill/:room_id/', verify, customerController.getPreBill);
-router.get('/getReservation/', verify, customerController.getReservation);
+router.get('/getPreBill/:room_id', verify, customerController.getPreBill);
+router.get('/getReservation', verify, customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
 router.post('/rating', verify, customerController.rating);
+router.post('/report', verify, customerController.report);
 
 export default router;
