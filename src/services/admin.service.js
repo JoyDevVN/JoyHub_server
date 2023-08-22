@@ -1,4 +1,5 @@
 import { Account, Moderator } from "../databases/account.model";
+import { Room } from "../databases/room.model";
 
 const activeModerator = async (id) => {
     const data = await Moderator.findOneAndUpdate(
@@ -72,26 +73,42 @@ const getUnacceptedModerators = async () => {
 };
 
 const removeModerator = async (id) => {
-    // remove moderator from moderator as well as account
-    // const { error: error_mod } = await db
-    //     .from("moderator")
-    //     .delete()
-    //     .eq("account_id", username);
-    // if (error_mod) {
-    //     throw new Error(error_mod.message);
-    // }
-    // const { error_acc } = await db
-    //     .from("account")
-    //     .delete()
-    //     .eq("account_id", username);
-    // if (error_acc) {
-    //     throw new Error(error_acc.message);
-    // }
-    const data = await Moderator.findOneAndDelete({ account_id: id });
-    if (!data) {
+    // check if this moderator exists
+    const account = Account.findById(id);
+    if (!account) {
         return { error: "This moderator does not exist" };
     }
+    // delete this moderator
+    const data = await Moderator.findOneAndDelete({
+        account_id: id,
+    });
+    // delete this account
+    const result = await Account.findByIdAndDelete(id);
+    if (!data || !result) {
+        return { error: "Internal error" };
+    }
 
+    return { result: "success" };
+};
+
+const activeRoom = async (id) => {
+    const data = await Room.findByIdAndUpdate(
+        id,
+        {
+            isAcepeted: true,
+        }
+    );
+    if (!data) {
+        return { error: "This room does not exist" };
+    }
+    return { result: "success" };
+};
+
+const removeRoom = async (id) => {
+    const data = await Room.findByIdAndDelete(id);
+    if (!data) {
+        return { error: "This room does not exist" };
+    }
     return { result: "success" };
 };
 
@@ -132,34 +149,29 @@ const getRooms = async () => {
 
 // Get all rooms that are not accepted of a moderator
 const getUnacceptedRooms = async (id) => {
-    let result = await Moderator.aggregate([
-        {
-            $lookup: {
-                from: "room",
-                localField: "account_id",
-                foreignField: "hotel_id",
-                as: "rooms",
-            },
-        },
-        {
-            $match: {
-                "room.isAccepted": false,
-            },
-        },
-        {
-            $project: {
-                _id: 0,
-                account_id: 1,
-                hotel_name: 1,
-                address: 1,
-                rooms: { $size: "$room" },
-            },
-        }
-    ]);
+    // console.log(`Getting unaccepted room list of ${id}`);
+    let result = await Room.find({
+        hotel_id: id,
+        isAcepeted: false,
+    }, {
+        _id: 1,
+        name: 1,
+        price: 1,
+        image: 1,
+    });
+    // console.log(result);
     if (!result) {
         return { error: "Internal error" };
     }
     return { result: result };
+};
+
+const getRoomInfo = async (id) => {
+    const data = await Room.findById(id);
+    if (!data) {
+        return { error: "Internal error" };
+    }
+    return { result: data };
 };
 
 export default {
@@ -169,4 +181,7 @@ export default {
     removeModerator,
     getRooms,
     getUnacceptedRooms,
+    getRoomInfo,
+    activeRoom,
+    removeRoom,
 };

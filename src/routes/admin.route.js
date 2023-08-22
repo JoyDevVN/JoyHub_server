@@ -9,6 +9,11 @@ router.get('/moderators/inactive', authController.verify, adminController.verify
 router.delete('/moderators/:id', authController.verify, adminController.verifyAdmin, adminController.removeModerator);
 
 
+router.put('/rooms/active/:id', authController.verify, adminController.verifyAdmin, adminController.activeRoom);
+router.delete('/rooms/:id', authController.verify, adminController.verifyAdmin, adminController.removeRoom);
 router.get('/rooms', authController.verify, adminController.verifyAdmin, adminController.getRooms);
-router.get('/rooms/inactive/:id', authController.verify, adminController.verifyAdmin, adminController.getUnacceptedRooms);
+// get details of a room
+router.get('/rooms/:id', authController.verify, adminController.verifyAdmin, adminController.getRoomInfo);
+// get all rooms that are not accepted of a moderator
+router.get('/rooms/pending/:id', authController.verify, adminController.verifyAdmin, adminController.getUnacceptedRooms);
 export default router;
