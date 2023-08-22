@@ -87,6 +87,23 @@ const getRoomInfo = async (req, res) => {
     res.status(200).json({ message: result });
 }
 
+const getReportList = async (req, res) => {
+    const { result, error } = await adminService.getReportList();
+    if (error) {
+        return res.status(400).json({ error: error });
+    }
+    res.status(200).json({ message: result });
+}
+
+const getReportOfHotel = async (req, res) => {
+    const id = req.params.id;
+    const { result, error } = await adminService.getReportOfHotel(id);
+    if (error) {
+        return res.status(400).json({ error: error });
+    }
+    res.status(200).json({ message: result });
+}
+
 export default {
     activeModerator,
     getModerators,
@@ -98,4 +115,6 @@ export default {
     getRoomInfo,
     activeRoom,
     removeRoom,
+    getReportList,
+    getReportOfHotel
 }

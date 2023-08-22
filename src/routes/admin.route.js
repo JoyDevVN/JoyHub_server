@@ -16,4 +16,8 @@ router.get('/rooms', authController.verify, adminController.verifyAdmin, adminCo
 router.get('/rooms/:id', authController.verify, adminController.verifyAdmin, adminController.getRoomInfo);
 // get all rooms that are not accepted of a moderator
 router.get('/rooms/pending/:id', authController.verify, adminController.verifyAdmin, adminController.getUnacceptedRooms);
+
+
+router.get('/report', authController.verify, adminController.verifyAdmin, adminController.getReportList);
+router.get('/report/:id', authController.verify, adminController.verifyAdmin, adminController.getReportOfHotel);
 export default router;
