@@ -128,6 +128,27 @@ export const addAmenity = async (req, res) => {
     res.status(200).json({ message: result });
 }
 
+export const getVerify = async (req, res) => {
+    const id = req.user.account_id;
+    const { result, error } = await modService.getVerify(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
+
+export const acceptVerify = async (req, res) => {
+    console.log("BBB:",req.params.id)
+    const { result, error } = await modService.acceptVerify(req.params.id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
 export default class modController {
     static verifyMod = verifyMod;
     // Room-type
@@ -147,4 +168,7 @@ export default class modController {
     //Amenity
     static getAllAmenity = getAllAmenity;
     static addAmenity = addAmenity;
+    //MainScreen
+    static getVerify = getVerify;
+    static acceptVerify = acceptVerify;
 }

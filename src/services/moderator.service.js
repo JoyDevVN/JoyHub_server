@@ -1,4 +1,5 @@
 import { RoomType, Room, RoomAmenity, RoomImage, AmenityModel } from "../databases/room.model.js";
+import { Booking, Bill } from "../databases/booking.model.js";
 import { Moderator } from "../databases/account.model.js";
 
 export const getRoomType = async (id) => {
@@ -180,7 +181,7 @@ export const updateRoomInfo = async (data) => {
 
 export const deleteRoom = async (id) => {
     try {
-    
+
         const result = await Room.findOneAndDelete({
             _id: id,
         });
@@ -234,37 +235,42 @@ export const getHotelRoomList = async (id) => {
     let result = await Room.aggregate([
         {
             $addFields: {
-                'roomId': {$toString: '$_id'}
+                'roomId': { $toString: '$_id' }
             }
         }, {
             $lookup: {
-                from: 'room_amenities', 
-                localField: 'roomId', 
-                foreignField: 'room_id', 
+                from: 'room_amenities',
+                localField: 'roomId',
+                foreignField: 'room_id',
                 as: 'amenities'
             }
         }, {
             $lookup: {
-                from: 'amenities', 
-                localField: 'amenities.amenity_id', 
-                foreignField: 'amenity_id', 
+                from: 'amenities',
+                localField: 'amenities.amenity_id',
+                foreignField: 'amenity_id',
                 as: 'amenitiesInfo'
             }
         }, {
+            $match: {
+                hotel_id: id,
+            }
+        },
+        {
             $project: {
-                _id: 1 ,
-                name: 1 ,
-                room_type: 1 ,
-                bedroom: 1 ,
-                area: 1 ,
-                description: 1 ,
-                bathroom: 1 ,
-                isAccepted: 1 ,
-                isBooked: 1 ,
-                price: 1 ,
-                guest: 1 ,
-                image: 1 ,
-                chosenAmenities: 1, 
+                _id: 1,
+                name: 1,
+                room_type: 1,
+                bedroom: 1,
+                area: 1,
+                description: 1,
+                bathroom: 1,
+                isAccepted: 1,
+                isBooked: 1,
+                price: 1,
+                guest: 1,
+                image: 1,
+                chosenAmenities: 1,
                 amenities: '$amenitiesInfo'
             }
         }
@@ -357,6 +363,82 @@ export const addAmenity = async () => {
 
 }
 
+export const getVerify = async (hotel_id) => {
+    let data = await Booking.aggregate([
+        {
+            $match: {
+                hotel_id: hotel_id,
+                status: "waiting"
+            },
+        },
+        {
+            $addFields:{
+                'roomObjId' : { $toObjectId: '$room_id' }
+            }
+        },
+        {
+            $addFields:{
+                'accountObjId' : { $toObjectId: '$account_id' }
+            }
+        },
+        {
+            $lookup: {
+                from: "customers",
+                localField: "account_id",
+                foreignField: "account_id",
+                as: "customer",
+            },
+        },
+        {
+            $lookup: {
+                from: "accounts",
+                localField: "accountObjId",
+                foreignField: "_id",
+                as: "acc",
+            },
+        },
+        {
+            $lookup: {
+                from: "rooms",
+                localField: "roomObjId",
+                foreignField: "_id",
+                as: "room",
+            },
+        },
+        {
+            $project: {
+                
+                room: '$room.name',
+                customer : '$customer.full_name',
+                checkin : '$check_in',
+                checkout:'$check_out',
+                phone: '$acc.phone'
+            }
+        }
+    ]);
+
+
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: data };
+}
+
+export const acceptVerify = async (id) => {
+    console.log ("ACCEPT DATA", id)
+    let res = await Booking.updateOne(
+        {_id : id} , 
+        { $set: {status: "completed"} }
+    )
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+}
+
 
 export default class modService {
     // Room-type
@@ -377,4 +459,7 @@ export default class modService {
     //Amenity
     static getAllAmenity = getAllAmenity;
     static addAmenity = addAmenity;
+    //MainScreen
+    static getVerify = getVerify;
+    static acceptVerify = acceptVerify;
 }

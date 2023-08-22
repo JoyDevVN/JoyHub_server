@@ -39,12 +39,10 @@ router.get('/hotel/room/:id', verify, modController.verifyMod, modController.get
 router.get('/test', (req, res) => {
     res.json({ message: "test" });
 });
-router.get('/verify', verify, modController.verifyMod, (req, res) => {
-    // if (req.user.role !== "moderator") {
-    //     return res.status(401).json({ error: "Access denied" });
-    // }
-    res.json({ message: "verify" });
-});
+
+//mainscreen
+router.get('/verify', verify, modController.verifyMod, modController.getVerify);
+router.put('/verify/:id', verify, modController.verifyMod, modController.acceptVerify);
 
 
 //amenity route
