@@ -17,5 +17,6 @@ router.get('/getPreBill/:room_id', verify, customerController.getPreBill);
 router.get('/getReservation', verify, customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
 router.post('/rating', verify, customerController.rating);
+router.post('/report', verify, customerController.report);
 
 export default router;

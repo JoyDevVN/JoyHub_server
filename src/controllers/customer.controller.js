@@ -74,8 +74,18 @@ export const rating = async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: "Rating success" });
+    res.status(200).json({ message: result });
 };
+
+export const report = async (req, res) => {
+    const {booking_id, content} = req.body;
+    const customer_id = req.user.account_id;
+    const { result, error } = await customerService.report(customer_id, booking_id, content);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
 
 export default class customerController {
     static getHotelList = getHotelList;
@@ -86,4 +96,5 @@ export default class customerController {
     static getRoomInfo = getRoomInfo;
     static getNotificationList = getNotificationList;
     static rating = rating;
+    static report = report;
 }

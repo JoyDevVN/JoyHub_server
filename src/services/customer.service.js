@@ -1,6 +1,6 @@
 import {Room, RoomAmenity} from "../databases/room.model.js";
 import {Customer, Moderator} from "../databases/account.model.js";
-import {Notification, Rating} from "../databases/notification.model.js";
+import {Notification, Rating, Report} from "../databases/notification.model.js";
 import {Booking} from "../databases/booking.model.js";
 
 export const getHotelList = async () => {
@@ -198,7 +198,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
             },
         ])
         //console.log(`Rooms: length: ${data[0].rooms.length}`)
-        // check if each room in hotel is available
+        // check if each room in the hotel is available
         let bookings = await Booking.aggregate([
             {
                 $match: {
@@ -600,6 +600,36 @@ export const rating = async (booking_id, customer_id, star, comment) => {
     }
 }
 
+export const report = async (customer_id, booking_id, content) => {
+    try {
+        // get info of booking by booking_id
+        let booking = await Booking.findById(booking_id);
+        if (booking.status !== "completed") {
+            return {error: "Booking is not completed"};
+        }
+        // get the name of the hotel and customer
+        let hotel = await Moderator.findOne({account_id: booking.hotel_id}, {hotel_name: 1});
+        let customer = await Customer.findOne({account_id: customer_id}, {full_name: 1});
+        // generate title of the report from content
+        let title = `Report from ${customer.full_name} to ${hotel.hotel_name}`;
+
+        let report = new Report({
+            booking_id: booking_id,
+            hotel_id: booking.hotel_id,
+            room_id: booking.room_id,
+            customer_id: customer_id,
+            title: title,
+            content: content,
+        })
+        console.log(`Report: ${JSON.stringify(report, null, 2)}`);
+        await report.save();
+        return {result: "Report success"};
+    }
+    catch (error) {
+        return {error: error.message};
+    }
+}
+
 export default class customerService {
     static getHotelList = getHotelList;
     static getNotificationList = getNotificationList;
@@ -609,4 +639,5 @@ export default class customerService {
     static getReservation = getReservation;
     static getRoomInfo = getRoomInfo;
     static rating = rating;
+    static report = report;
 }
