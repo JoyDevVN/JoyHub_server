@@ -473,7 +473,7 @@ export const getReservation = async (id) => {
                     item.room_name = item.room.name;
                     item.room_price = item.room.price;
                     item.room_type = item.room.room_type;
-                    item.thumbnail = item.room.image[0];
+                    item.thumbnail = (item.room.image && item.room.image.length > 0) ? item.room.image[0] : "";
                     delete item.room;
                 }
                 if (item.hotels) {
