@@ -43,7 +43,7 @@ router.get('/test', (req, res) => {
 //mainscreen
 router.get('/verify', verify, modController.verifyMod, modController.getVerify);
 router.put('/verify/:id', verify, modController.verifyMod, modController.acceptVerify);
-
+router.delete('/verify/:id', verify, modController.verifyMod, modController.removeVerify);
 
 //amenity route
 router.get('/amenity',verify, modController.verifyMod, modController.getAllAmenity);

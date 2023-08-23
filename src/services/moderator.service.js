@@ -408,6 +408,7 @@ export const getVerify = async (hotel_id) => {
         {
             $project: {
                 
+                image: '$room.image',
                 room: '$room.name',
                 customer : '$customer.full_name',
                 checkin : '$check_in',
@@ -439,6 +440,23 @@ export const acceptVerify = async (id) => {
     return { result: res };
 }
 
+export const removeVerify = async (id) => {
+    console.log("BOOKING:",id)
+    try {
+        const result = await Booking.findOneAndDelete({
+            _id: id,
+        });
+        if (!result) {
+            return { error: `Invalid request` };
+        }
+
+        return { result: `successful` };
+    }
+    catch (err) {
+        return { error: err.message };
+    }
+
+}
 
 export default class modService {
     // Room-type
@@ -462,4 +480,5 @@ export default class modService {
     //MainScreen
     static getVerify = getVerify;
     static acceptVerify = acceptVerify;
+    static removeVerify = removeVerify;
 }

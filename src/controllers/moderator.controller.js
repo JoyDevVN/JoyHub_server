@@ -140,7 +140,7 @@ export const getVerify = async (req, res) => {
 
 
 export const acceptVerify = async (req, res) => {
-    console.log("BBB:",req.params.id)
+   
     const { result, error } = await modService.acceptVerify(req.params.id);
     if (error) {
         return res.status(401).json({ message: error });
@@ -148,6 +148,17 @@ export const acceptVerify = async (req, res) => {
     res.status(200).json({ message: result }); 
 
 }
+
+export const removeVerify = async (req, res) => {
+    const { result, error } = await modService.removeVerify(req.params.id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+
+}
+
 
 export default class modController {
     static verifyMod = verifyMod;
@@ -171,4 +182,5 @@ export default class modController {
     //MainScreen
     static getVerify = getVerify;
     static acceptVerify = acceptVerify;
+    static removeVerify = removeVerify;
 }
