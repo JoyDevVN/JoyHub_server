@@ -9,17 +9,25 @@ router.get('/', (req, res) => {
     res.send('Welcome to Customer API');
 });
 
-router.get('/hotel', customerController.getHotelList);
-router.post('/hotel/:id', customerController.getHotelInfo);
-router.get('/room/:id', customerController.getRoomInfo);
-router.get('/room_amenity/:id', customerController.getRoomAmenity);
+router.get('/hotel', verify, customerController.getHotelList);
+router.post('/hotel/:id', verify, customerController.getHotelInfo);
+router.get('/room/:id', verify, customerController.getRoomInfo);
+router.get('/room_amenity/:id', verify, customerController.getRoomAmenity);
 router.get('/getPreBill/:room_id', verify, customerController.getPreBill);
 router.get('/getReservation', verify, customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
+
+//req.body  { booking_id, star, content}
 router.post('/rating', verify, customerController.rating);
+
+//req.body  { booking_id, content}
 router.post('/report', verify, customerController.report);
-router.put('/profile', customerController.updateInfo)
-router.put('/cancelRoom', customerController.cancelRoom)
+
+//req.body  { email, phone, user_name}
+router.put('/profile', verify, customerController.updateInfo)
+
+//req.body  { hotel_id, room_id}
+router.put('/cancelRoom', verify, customerController.cancelRoom)
 
 
 export default router;
