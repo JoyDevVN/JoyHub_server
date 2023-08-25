@@ -17,15 +17,15 @@ export const verifyMod = async (req, res, next) => {
     next();
 }
 
-export const insertRoomType = async (req, res) => {
-    req.body.hotel_id = req.user.account_id;
-    // console.log(`insertRoomType: ${JSON.stringify(req.body, null, 2)}`);
-    const { result, error } = await modService.insertRoomType(req.body);
-    if (error) {
-        return res.status(401).json({ message: error });
-    }
-    res.status(200).json({ message: result });
-};
+// export const insertRoomType = async (req, res) => {
+//     req.body.hotel_id = req.user.account_id;
+//     // console.log(`insertRoomType: ${JSON.stringify(req.body, null, 2)}`);
+//     const { result, error } = await modService.insertRoomType(req.body);
+//     if (error) {
+//         return res.status(401).json({ message: error });
+//     }
+//     res.status(200).json({ message: result });
+// };
 
 export const updateRoomTypeName = async (req, res) => {
     req.body.hotel_id = req.user.account_id;
@@ -134,28 +134,28 @@ export const getVerify = async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
 
 export const acceptVerify = async (req, res) => {
-   
+
     const { result, error } = await modService.acceptVerify(req.params.id);
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
 export const declineVerify = async (req, res) => {
-   
+
     const { result, error } = await modService.declineVerify(req.params.id);
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
@@ -165,7 +165,7 @@ export const removeVerify = async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 
 }
@@ -176,17 +176,17 @@ export const getCheckin = async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
 export const checkin = async (req, res) => {
-   
+
     const { result, error } = await modService.checkin(req.params.id);
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
@@ -197,17 +197,17 @@ export const getCheckout = async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 
 }
 
 export const checkout = async (req, res) => {
-   
+
     const { result, error } = await modService.checkout(req.params.id);
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 }
 
 export const getModInfo= async (req, res) => {
@@ -216,7 +216,7 @@ export const getModInfo= async (req, res) => {
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 }
 
 export const editInfo= async (req, res) =>{
@@ -230,15 +230,15 @@ export const editInfo= async (req, res) =>{
     if (error) {
         return res.status(401).json({ message: error });
     }
-    res.status(200).json({ message: result }); 
+    res.status(200).json({ message: result });
 }
 
 export default class modController {
     static verifyMod = verifyMod;
     // Room-type
-    static getRoomType = getRoomType;
-    static insertRoomType = insertRoomType;
-    static updateRoomTypeName = updateRoomTypeName;
+    // static getRoomType = getRoomType;
+    // static insertRoomType = insertRoomType;
+    // static updateRoomTypeName = updateRoomTypeName;
     // Room
     static insertNewRoom = insertNewRoom;
     static getRoomInfo = getRoomInfo;

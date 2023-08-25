@@ -20,4 +20,5 @@ router.get('/rooms/pending/:id', authController.verify, adminController.verifyAd
 
 router.get('/report', authController.verify, adminController.verifyAdmin, adminController.getReportList);
 router.get('/report/:id', authController.verify, adminController.verifyAdmin, adminController.getReportOfHotel);
+router.put('/report/:id', authController.verify, adminController.verifyAdmin, adminController.updateReadingStatus);
 export default router;

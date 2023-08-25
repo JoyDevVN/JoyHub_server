@@ -5,7 +5,7 @@ import { Account, Customer, Moderator } from "../databases/account.model.js";
 const isExist = async (username, email) => {
     const account = await Account.findOne({
         $or: [{ username: username }, { email: email }],
-    });
+    }).lean();
     if (account) {
         throw new Error("Username or email is already exist");
     }
@@ -16,7 +16,7 @@ const register = async (data) => {
         const { username, email, password, role } = data;
         // console.log(`[INFO] Registering account ${JSON.stringify(data)}`);
         // check if username or email already exists
-        // await isExist(username);
+        await isExist(username);
         const salt = await bcrypt.genSalt(10);
         const account = new Account({
             username: username,
@@ -24,14 +24,14 @@ const register = async (data) => {
             password: bcrypt.hashSync(password, salt),
             role: role,
         });
-        const savedAccount = await account.save();
+        // const savedAccount = await account.save();
         // insert account to customer or hotel
         if (role === "customer") {
             const customer = new Customer({
                 account_id: savedAccount._id,
                 full_name: data.full_name,
             });
-            await customer.save();
+            await Promise.all([account.save(), customer.save()]);
         } else if (role === "moderator") {
             const moderator = new Moderator({
                 account_id: savedAccount._id,
@@ -40,7 +40,7 @@ const register = async (data) => {
                 description: data.description,
                 owner_name: data.owner_name,
             });
-            await moderator.save();
+            await Promise.all([account.save(), moderator.save()]);
         }
 
         return { result: `Account ${username} is created`, error: null };
@@ -54,7 +54,7 @@ const login = async (data) => {
         const { username, password } = data;
         console.log(`[INFO] Login account ${JSON.stringify(data)}`);
         // find an account by username
-        const account = await Account.findOne({ username: username });
+        const account = await Account.findOne({ username: username }).lean();
         if (!account) {
             return { result: null, token: null, role: null, error: "Username is not exist" };
         }
