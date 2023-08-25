@@ -221,12 +221,18 @@ export const getModInfo= async (req, res) => {
 
 export const editInfo= async (req, res) =>{
     const id = req.user.account_id;
-    console.log("REQ PARAM:",req.params)
-    console.log("--------------------------------------------------------------------------------------------------------------------")
 
-    console.log("REQ:",req)
 
     const { result, error } = await modService.editInfo(id,req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
+
+export const getNotifications = async (req, res) =>{
+    const id = req.user.account_id;
+    const { result, error } = await modService.getNotifications(id);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -267,4 +273,7 @@ export default class modController {
     //user info
     static getModInfo = getModInfo;
     static editInfo = editInfo;
+
+    //notifications
+    static getNotifications = getNotifications;
 }
