@@ -19,5 +19,7 @@ router.get('/notification_list', verify, customerController.getNotificationList)
 router.post('/rating', verify, customerController.rating);
 router.post('/report', verify, customerController.report);
 router.put('/profile', customerController.updateInfo)
+router.put('/cancelRoom', customerController.cancelRoom)
+
 
 export default router;

@@ -662,6 +662,23 @@ const updateInfo = async (id, full_name, email, phone) => {
     return {result: "success"};
 };
 
+const cancelRoom = async (id, hotel_id, room_id) => {
+    const data = await Booking.findOneAndUpdate(
+        {
+            hotel_id: hotel_id,
+            room_id: room_id,
+            account_id: id
+        },
+        {
+            status: "canceled",
+        }
+    );
+    if (!data) {
+        return {error: "This account did not book this room"};
+    }
+    return {result: "success"};
+};
+
 export default class customerService {
     static getHotelList = getHotelList;
     static getNotificationList = getNotificationList;
@@ -673,4 +690,5 @@ export default class customerService {
     static rating = rating;
     static report = report;
     static updateInfo = updateInfo;
+    static cancelRoom = cancelRoom;
 }

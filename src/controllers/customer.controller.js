@@ -88,9 +88,19 @@ export const report = async (req, res) => {
 }
 
 export const updateInfo = async (req, res) => {
-    const id = "64ddff79df3bc0763ba06d52";
+    const id = req.user.account_id;
     const { email, phone, full_name} = req.body;
     const { result, error } = await customerService.updateInfo(id, full_name, email, phone);
+    if (error) {
+        return res.status(401).json({ error: error });
+    }
+    res.status(200).json({ message: result });
+}
+
+export const cancelRoom = async (req, res) => {
+    const id = req.user.account_id;
+    const { hotel_id, room_id } = req.body;
+    const { result, error } = await customerService.cancelRoom(id, hotel_id, room_id);
     if (error) {
         return res.status(401).json({ error: error });
     }
@@ -108,4 +118,5 @@ export default class customerController {
     static rating = rating;
     static report = report;
     static updateInfo = updateInfo;
+    static cancelRoom = cancelRoom;
 }
