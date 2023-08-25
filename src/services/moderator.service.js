@@ -1,6 +1,7 @@
 import { RoomType, Room, RoomAmenity, RoomImage, AmenityModel } from "../databases/room.model.js";
 import { Booking, Bill } from "../databases/booking.model.js";
 import { Account, Moderator } from "../databases/account.model.js";
+import {Notification} from "../databases/notification.model.js";
 
 
 export const getRoomType = async (id) => {
@@ -609,7 +610,20 @@ export const editInfo = async (id, newinfo) => {
 }
 
 export const getNotifications = async (id) =>{
-    
+    let notification = await Notification.aggregate([
+        {
+            $addFields:{
+                'acc_id' : { $toObjectId: '$to_id' }
+            }
+        },
+        {
+            $match:{
+                '$to_id' : id
+            }
+        },
+    ])
+    if(notification)
+        return {result : notification}
 }
 
 export default class modService {
