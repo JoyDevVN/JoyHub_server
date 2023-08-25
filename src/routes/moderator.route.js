@@ -56,10 +56,12 @@ router.get('/info', verify, modController.verifyMod, modController.getModInfo);
 router.put('/info', verify, modController.verifyMod, modController.editInfo);
 
 
-//amenity route
+//amenity 
 router.get('/amenity',verify, modController.verifyMod, modController.getAllAmenity);
-
 router.post('/amenity', modController.addAmenity);
+
+//Notifications
+router.get('/notification',verify, modController.verifyMod, modController.getNotifications);
 
 
 export default router;

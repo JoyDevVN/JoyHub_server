@@ -610,18 +610,8 @@ export const editInfo = async (id, newinfo) => {
 }
 
 export const getNotifications = async (id) =>{
-    let notification = await Notification.aggregate([
-        {
-            $addFields:{
-                'acc_id' : { $toObjectId: '$to_id' }
-            }
-        },
-        {
-            $match:{
-                '$to_id' : id
-            }
-        },
-    ])
+    let notification = await Notification.find({to_id: id})
+    console.log("NOTI:",notification)
     if(notification)
         return {result : notification}
 }
