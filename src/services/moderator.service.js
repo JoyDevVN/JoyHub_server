@@ -1,7 +1,7 @@
 import { RoomType, Room, RoomAmenity, RoomImage, AmenityModel } from "../databases/room.model.js";
 import { Booking, Bill } from "../databases/booking.model.js";
 import { Account, Moderator } from "../databases/account.model.js";
-import {Notification} from "../databases/notification.model.js";
+import { Notification } from "../databases/notification.model.js";
 
 
 export const getRoomType = async (id) => {
@@ -265,13 +265,13 @@ export const getVerify = async (hotel_id) => {
             },
         },
         {
-            $addFields:{
-                'roomObjId' : { $toObjectId: '$room_id' }
+            $addFields: {
+                'roomObjId': { $toObjectId: '$room_id' }
             }
         },
         {
-            $addFields:{
-                'accountObjId' : { $toObjectId: '$account_id' }
+            $addFields: {
+                'accountObjId': { $toObjectId: '$account_id' }
             }
         },
         {
@@ -302,9 +302,9 @@ export const getVerify = async (hotel_id) => {
             $project: {
                 image: '$room.image',
                 room: '$room.name',
-                customer : '$customer.full_name',
-                checkin : '$check_in',
-                checkout:'$check_out',
+                customer: '$customer.full_name',
+                checkin: '$check_in',
+                checkout: '$check_out',
                 phone: '$acc.phone'
             }
         }
@@ -320,27 +320,66 @@ export const getVerify = async (hotel_id) => {
 
 export const acceptVerify = async (id) => {
 
-    let res = await Booking.updateOne(
-        {_id : id} ,
-        { $set: {status: "approved"} }
-    )
+    let res = await Booking.findOneAndUpdate(
+        { _id: id },
+        { $set: { status: "approved" } }
+    ).lean();
 
     if (!res) {
         return { error: `Invalid request` };
     }
 
+    // update notification of this booking
+    let notification = await Notification.findOneAndUpdate({
+        booking_id: id,
+    },
+        {
+            $set: {
+                from_id: res.hotel_id,
+                to_id: res.account_id,
+                for: "customer",
+                title: "Booking accepted",
+                content: "Your booking has been accepted",
+                status: "accepted",
+                room_id: res.room_id,
+                isRead: false,
+            }
+        }).lean();
+    if (!notification) {
+        return { error: `Error when create nofication` };
+    }
     return { result: res };
 }
 
 export const declineVerify = async (id) => {
 
     let res = await Booking.updateOne(
-        {_id : id} ,
-        { $set: {status: "rejected"} }
+        { _id: id },
+        { $set: { status: "rejected" } }
     )
 
     if (!res) {
         return { error: `Invalid request` };
+    }
+
+    // update notification of this booking
+    let notification = await Notification.findOneAndUpdate({
+        booking_id: id,
+    },
+        {
+            $set: {
+                from_id: res.hotel_id,
+                to_id: res.account_id,
+                for: "customer",
+                title: "Booking declined",
+                content: "Your booking has been declined",
+                status: "rejected",
+                room_id: res.room_id,
+                isRead: false,
+            }
+        }).lean();
+    if (!notification) {
+        return { error: `Error when create nofication` };
     }
 
     return { result: res };
@@ -350,7 +389,7 @@ export const declineVerify = async (id) => {
 
 
 export const removeVerify = async (id) => {
-    console.log("BOOKING:",id)
+    console.log("BOOKING:", id)
     try {
         const result = await Booking.findOneAndDelete({
             _id: id,
@@ -378,13 +417,13 @@ export const getCheckin = async (hotel_id) => {
             },
         },
         {
-            $addFields:{
-                'roomObjId' : { $toObjectId: '$room_id' }
+            $addFields: {
+                'roomObjId': { $toObjectId: '$room_id' }
             }
         },
         {
-            $addFields:{
-                'accountObjId' : { $toObjectId: '$account_id' }
+            $addFields: {
+                'accountObjId': { $toObjectId: '$account_id' }
             }
         },
         {
@@ -416,30 +455,56 @@ export const getCheckin = async (hotel_id) => {
 
                 image: '$room.image',
                 room: '$room.name',
-                customer : '$customer.full_name',
-                checkin : '$check_in',
+                customer: '$customer.full_name',
+                checkin: '$check_in',
                 phone: '$acc.phone'
             }
         }
     ]);
 
-
     if (!data) {
         return { error: `Invalid request` };
     }
+
 
     return { result: data };
 }
 
 export const checkin = async (id) => {
 
-    let res = await Booking.updateOne(
-        {_id : id} ,
-        { $set: {status: "staying"} }
-    )
+    let res = await Booking.findByIdAndUpdate({
+        _id: id,
+    },
+        {
+            $set: {
+                status: "staying",
+            }
+        }).lean();
 
     if (!res) {
         return { error: `Invalid request` };
+    }
+
+
+    // update notification of this booking
+    let notification = await Notification.findOneAndUpdate({
+        booking_id: id,
+    },
+        {
+            $set: {
+                from_id: res.hotel_id,
+                to_id: res.account_id,
+                for: "customer",
+                title: "New checkin",
+                content: "You have been checked in",
+                status: "accepted",
+                room_id: res.room_id,
+                isRead: false,
+            }
+        }).lean();
+
+    if (!notification) {
+        return { error: `Error when create nofication` };
     }
 
     return { result: res };
@@ -457,13 +522,13 @@ export const getCheckout = async (hotel_id) => {
             },
         },
         {
-            $addFields:{
-                'roomObjId' : { $toObjectId: '$room_id' }
+            $addFields: {
+                'roomObjId': { $toObjectId: '$room_id' }
             }
         },
         {
-            $addFields:{
-                'accountObjId' : { $toObjectId: '$account_id' }
+            $addFields: {
+                'accountObjId': { $toObjectId: '$account_id' }
             }
         },
         {
@@ -495,8 +560,8 @@ export const getCheckout = async (hotel_id) => {
 
                 image: '$room.image',
                 room: '$room.name',
-                customer : '$customer.full_name',
-                checkout : '$check_out',
+                customer: '$customer.full_name',
+                checkout: '$check_out',
                 phone: '$acc.phone'
             }
         }
@@ -512,13 +577,34 @@ export const getCheckout = async (hotel_id) => {
 
 export const checkout = async (id) => {
 
-    let res = await Booking.updateOne(
-        {_id : id} ,
-        { $set: {status: "completed"} }
+    let res = await Booking.findByIdAndUpdate(
+        { _id: id },
+        { $set: { status: "completed" } }
     )
 
     if (!res) {
         return { error: `Invalid request` };
+    }
+
+    // update notification of this booking
+    let notification = await Notification.findOneAndUpdate({
+        booking_id: id,
+    },
+        {
+            $set: {
+                from_id: res.hotel_id,
+                to_id: res.account_id,
+                for: "customer",
+                title: "New checkout",
+                content: "You have been checked out",
+                status: "accepted",
+                room_id: res.room_id,
+                isRead: false,
+            }
+        }).lean();
+
+    if (!notification) {
+        return { error: `Error when create nofication` };
     }
 
     return { result: res };
@@ -528,12 +614,12 @@ export const checkout = async (id) => {
 export const getModInfo = async (id) => {
     const data = await Moderator.aggregate([
         {
-            $addFields:{
-                'acc_id' : { $toObjectId: '$account_id' }
+            $addFields: {
+                'acc_id': { $toObjectId: '$account_id' }
             }
         },
         {
-            $lookup : {
+            $lookup: {
                 from: "accounts",
                 localField: "acc_id",
                 foreignField: "_id",
@@ -541,16 +627,16 @@ export const getModInfo = async (id) => {
             },
         },
         {
-            $project:{
+            $project: {
                 hotel_name: 1,
-                address : 1,
+                address: 1,
                 description: 1,
                 owner_name: 1,
                 isAccepted: 1,
-                phone : "$acc.phone",
-                email : "$acc.email",
+                phone: "$acc.phone",
+                email: "$acc.email",
                 username: "$acc.username",
-                image : 1,
+                image: 1,
             }
         }
     ]);
@@ -562,32 +648,31 @@ export const getModInfo = async (id) => {
     return { result: data };
 }
 
-const mongoose = require('mongoose');
-
 export const editInfo = async (id, newinfo) => {
-
     let res = null;
-    if(newinfo["newImage"] == true)
-    {
-            res = await Moderator.updateOne(
-                {  account_id : id} ,
-                { $set: {
-                    hotel_name : newinfo["hotel_name"],
-                    address : newinfo["address"],
-                    description : newinfo["description"],
-                    image : newinfo["image"],
-            } }
+    if (newinfo["newImage"] == true) {
+        res = await Moderator.updateOne(
+            { account_id: id },
+            {
+                $set: {
+                    hotel_name: newinfo["hotel_name"],
+                    address: newinfo["address"],
+                    description: newinfo["description"],
+                    image: newinfo["image"],
+                }
+            }
         )
     }
-    else
-    {
+    else {
         res = await Moderator.updateOne(
-            {  account_id : id} ,
-            { $set: {
-                hotel_name : newinfo["hotel_name"],
-                address : newinfo["address"],
-                description : newinfo["description"],
-        } }
+            { account_id: id },
+            {
+                $set: {
+                    hotel_name: newinfo["hotel_name"],
+                    address: newinfo["address"],
+                    description: newinfo["description"],
+                }
+            }
         )
     }
 
@@ -595,13 +680,7 @@ export const editInfo = async (id, newinfo) => {
         return { error: `Invalid request` };
     }
 
-    res = await Account.updateOne(
-        {  _id: mongoose.Types.ObjectId(id) },
-        { $set: {
-            phone : newinfo["phone"],
-    }
-    }
-    )
+    res = await Account.findByIdAndUpdate({ id }, { $set: { phone: newinfo["phone"] } })
     if (!res) {
         return { error: `Invalid request` };
     }
@@ -609,11 +688,11 @@ export const editInfo = async (id, newinfo) => {
     return { result: res };
 }
 
-export const getNotifications = async (id) =>{
-    let notification = await Notification.find({to_id: id})
-    console.log("NOTI:",notification)
-    if(notification)
-        return {result : notification}
+export const getNotifications = async (id) => {
+    let notification = await Notification.find({ to_id: id }).lean();
+    console.log("NOTI:", notification)
+    if (notification)
+        return { result: notification }
 }
 
 export default class modService {
@@ -649,6 +728,6 @@ export default class modService {
     static getModInfo = getModInfo;
     static editInfo = editInfo
 
-    //notifications 
+    //notifications
     static getNotifications = getNotifications
 }

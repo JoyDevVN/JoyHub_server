@@ -97,6 +97,10 @@ const ratingSchema = new Schema({
     },
 });
 
+notificationSchema.index({ booking_id: 1, status: 1, updated_at: 1 });
+reportSchema.index({ booking_id: 1, updated_at: 1 });
+ratingSchema.index({ updated_at: 1 });
+
 notificationSchema.pre('save', function (next) {
     this.update({}, { $set: { updated_at: new Date() } });
     next();
