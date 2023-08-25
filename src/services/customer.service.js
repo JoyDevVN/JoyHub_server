@@ -519,7 +519,7 @@ export const getRoomInfo = async (id) => {
             {
                 $lookup:
                     {
-                        from: "room_amenity",
+                        from: "room_amenities",
                         localField: "new_id",
                         foreignField: "room_id",
                         pipeline: [
