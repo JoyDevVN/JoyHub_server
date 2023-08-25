@@ -340,6 +340,7 @@ export const getPreBill = async (room_id, account_id) => {
                     "room_type": 1,
                     "location": 1,
                     "hotel": 1,
+                    "image": 1
                 }
             },
         ])
