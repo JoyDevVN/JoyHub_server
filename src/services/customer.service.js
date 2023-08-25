@@ -412,7 +412,6 @@ export const getReservation = async (id) => {
                             pipeline: [
                                 {
                                     $project: {
-                                        "_id": 0,
                                         "hotel_name": 1,
                                     }
                                 },
