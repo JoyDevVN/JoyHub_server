@@ -37,7 +37,7 @@ export const getHotelList = async () => {
             },
             {
                 $lookup: {
-                    from: "report",
+                    from: "ratings",
                     localField: "account_id",
                     foreignField: "hotel_id",
                     pipeline: [
@@ -162,7 +162,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
             },
             {
                 $lookup: {
-                    from: "report",
+                    from: "ratings",
                     localField: "account_id",
                     foreignField: "hotel_id",
                     pipeline: [
@@ -187,7 +187,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                             $project: {
                                 "star": 1,
                                 "customer": 1,
-                                "comment": 1,
+                                "content": 1,
 
                             }
                         },
