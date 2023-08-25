@@ -1,6 +1,7 @@
 import { RoomType, Room, RoomAmenity, RoomImage, AmenityModel } from "../databases/room.model.js";
 import { Booking, Bill } from "../databases/booking.model.js";
-import { Moderator } from "../databases/account.model.js";
+import { Account, Moderator } from "../databases/account.model.js";
+
 
 export const getRoomType = async (id) => {
 
@@ -368,7 +369,7 @@ export const getVerify = async (hotel_id) => {
         {
             $match: {
                 hotel_id: hotel_id,
-                status: "waiting"
+                status: "waiting",
             },
         },
         {
@@ -427,10 +428,10 @@ export const getVerify = async (hotel_id) => {
 }
 
 export const acceptVerify = async (id) => {
-    console.log ("ACCEPT DATA", id)
+
     let res = await Booking.updateOne(
         {_id : id} , 
-        { $set: {status: "completed"} }
+        { $set: {status: "approved"} }
     )
 
     if (!res) {
@@ -439,6 +440,23 @@ export const acceptVerify = async (id) => {
 
     return { result: res };
 }
+
+export const declineVerify = async (id) => {
+
+    let res = await Booking.updateOne(
+        {_id : id} , 
+        { $set: {status: "rejected"} }
+    )
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+}
+
+
+
 
 export const removeVerify = async (id) => {
     console.log("BOOKING:",id)
@@ -457,6 +475,249 @@ export const removeVerify = async (id) => {
     }
 
 }
+
+
+
+export const getCheckin = async (hotel_id) => {
+    let data = await Booking.aggregate([
+        {
+            $match: {
+                hotel_id: hotel_id,
+                status: "approved",
+            },
+        },
+        {
+            $addFields:{
+                'roomObjId' : { $toObjectId: '$room_id' }
+            }
+        },
+        {
+            $addFields:{
+                'accountObjId' : { $toObjectId: '$account_id' }
+            }
+        },
+        {
+            $lookup: {
+                from: "customers",
+                localField: "account_id",
+                foreignField: "account_id",
+                as: "customer",
+            },
+        },
+        {
+            $lookup: {
+                from: "accounts",
+                localField: "accountObjId",
+                foreignField: "_id",
+                as: "acc",
+            },
+        },
+        {
+            $lookup: {
+                from: "rooms",
+                localField: "roomObjId",
+                foreignField: "_id",
+                as: "room",
+            },
+        },
+        {
+            $project: {
+                
+                image: '$room.image',
+                room: '$room.name',
+                customer : '$customer.full_name',
+                checkin : '$check_in',
+                phone: '$acc.phone'
+            }
+        }
+    ]);
+
+
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: data };
+}
+
+export const checkin = async (id) => {
+
+    let res = await Booking.updateOne(
+        {_id : id} , 
+        { $set: {status: "staying"} }
+    )
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+}
+
+
+
+
+export const getCheckout = async (hotel_id) => {
+    let data = await Booking.aggregate([
+        {
+            $match: {
+                hotel_id: hotel_id,
+                status: "staying",
+            },
+        },
+        {
+            $addFields:{
+                'roomObjId' : { $toObjectId: '$room_id' }
+            }
+        },
+        {
+            $addFields:{
+                'accountObjId' : { $toObjectId: '$account_id' }
+            }
+        },
+        {
+            $lookup: {
+                from: "customers",
+                localField: "account_id",
+                foreignField: "account_id",
+                as: "customer",
+            },
+        },
+        {
+            $lookup: {
+                from: "accounts",
+                localField: "accountObjId",
+                foreignField: "_id",
+                as: "acc",
+            },
+        },
+        {
+            $lookup: {
+                from: "rooms",
+                localField: "roomObjId",
+                foreignField: "_id",
+                as: "room",
+            },
+        },
+        {
+            $project: {
+                
+                image: '$room.image',
+                room: '$room.name',
+                customer : '$customer.full_name',
+                checkout : '$check_out',
+                phone: '$acc.phone'
+            }
+        }
+    ]);
+
+
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: data };
+}
+
+export const checkout = async (id) => {
+    
+    let res = await Booking.updateOne(
+        {_id : id} , 
+        { $set: {status: "completed"} }
+    )
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+}
+
+
+export const getModInfo = async (id) => {
+    const data = await Moderator.aggregate([
+        {
+            $addFields:{
+                'acc_id' : { $toObjectId: '$account_id' }
+            }
+        },
+        {
+            $lookup : {
+                from: "accounts",
+                localField: "acc_id",
+                foreignField: "_id",
+                as: "acc",
+            },
+        },
+        {
+            $project:{
+                hotel_name: 1,
+                address : 1,
+                description: 1,
+                owner_name: 1,
+                isAccepted: 1,
+                phone : "$acc.phone",
+                email : "$acc.email",
+                username: "$acc.username",
+                image : 1,
+            }
+        }
+    ]);
+
+    
+    if (!data) {
+        return { error: `Invalid request` };
+    }
+    return { result: data };
+}
+
+const mongoose = require('mongoose');
+
+export const editInfo = async (id, newinfo) => {
+
+    let res = null;
+    if(newinfo["newImage"] == true)
+    {
+            res = await Moderator.updateOne(
+                {  account_id : id} , 
+                { $set: {
+                    hotel_name : newinfo["hotel_name"],
+                    address : newinfo["address"],
+                    description : newinfo["description"],
+                    image : newinfo["image"],
+            } }
+        )
+    }
+    else 
+    {
+        res = await Moderator.updateOne(
+            {  account_id : id} , 
+            { $set: {
+                hotel_name : newinfo["hotel_name"],
+                address : newinfo["address"],
+                description : newinfo["description"],
+        } }
+        )
+    }
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    res = await Account.updateOne(
+        {  _id: mongoose.Types.ObjectId(id) }, 
+        { $set: {
+            phone : newinfo["phone"],
+    } 
+    }
+    )
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+}
+
 
 export default class modService {
     // Room-type
@@ -480,5 +741,15 @@ export default class modService {
     //MainScreen
     static getVerify = getVerify;
     static acceptVerify = acceptVerify;
+    static declineVerify = declineVerify;
     static removeVerify = removeVerify;
+
+    static getCheckin = getCheckin;
+    static checkin = checkin;
+
+    static getCheckout = getCheckout;
+    static checkout = checkout
+    //user info
+    static getModInfo = getModInfo;
+    static editInfo = editInfo
 }

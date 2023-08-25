@@ -149,6 +149,17 @@ export const acceptVerify = async (req, res) => {
 
 }
 
+export const declineVerify = async (req, res) => {
+   
+    const { result, error } = await modService.declineVerify(req.params.id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
+
 export const removeVerify = async (req, res) => {
     const { result, error } = await modService.removeVerify(req.params.id);
     if (error) {
@@ -159,6 +170,68 @@ export const removeVerify = async (req, res) => {
 
 }
 
+export const getCheckin = async (req, res) => {
+    const id = req.user.account_id;
+    const { result, error } = await modService.getCheckin(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
+export const checkin = async (req, res) => {
+   
+    const { result, error } = await modService.checkin(req.params.id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
+
+export const getCheckout = async (req, res) => {
+    const id = req.user.account_id;
+    const { result, error } = await modService.getCheckout(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+
+}
+
+export const checkout = async (req, res) => {
+   
+    const { result, error } = await modService.checkout(req.params.id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+}
+
+export const getModInfo= async (req, res) => {
+    const id = req.user.account_id;
+    const { result, error } = await modService.getModInfo(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+}
+
+export const editInfo= async (req, res) =>{
+    const id = req.user.account_id;
+    console.log("REQ PARAM:",req.params)
+    console.log("--------------------------------------------------------------------------------------------------------------------")
+
+    console.log("REQ:",req)
+
+    const { result, error } = await modService.editInfo(id,req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result }); 
+}
 
 export default class modController {
     static verifyMod = verifyMod;
@@ -182,5 +255,16 @@ export default class modController {
     //MainScreen
     static getVerify = getVerify;
     static acceptVerify = acceptVerify;
+    static declineVerify = declineVerify;
+
     static removeVerify = removeVerify;
+
+    static getCheckin = getCheckin;
+    static checkin = checkin;
+
+    static getCheckout = getCheckout;
+    static checkout = checkout;
+    //user info
+    static getModInfo = getModInfo;
+    static editInfo = editInfo;
 }

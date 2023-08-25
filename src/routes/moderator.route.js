@@ -42,8 +42,19 @@ router.get('/test', (req, res) => {
 
 //mainscreen
 router.get('/verify', verify, modController.verifyMod, modController.getVerify);
-router.put('/verify/:id', verify, modController.verifyMod, modController.acceptVerify);
-router.delete('/verify/:id', verify, modController.verifyMod, modController.removeVerify);
+router.put('/verify/accept/:id', verify, modController.verifyMod, modController.acceptVerify);
+router.put('/verify/decline/:id', verify, modController.verifyMod, modController.declineVerify);
+
+router.get('/checkin', verify, modController.verifyMod, modController.getCheckin);
+router.put('/checkin/checkin/:id', verify, modController.verifyMod, modController.checkin);
+
+router.get('/checkout', verify, modController.verifyMod, modController.getCheckout);
+router.put('/checkout/checkout/:id', verify, modController.verifyMod, modController.checkout);
+
+//user info
+router.get('/info', verify, modController.verifyMod, modController.getModInfo);
+router.put('/info', verify, modController.verifyMod, modController.editInfo);
+
 
 //amenity route
 router.get('/amenity',verify, modController.verifyMod, modController.getAllAmenity);
