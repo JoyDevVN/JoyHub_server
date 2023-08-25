@@ -718,6 +718,9 @@ export const editInfo = async (id, newinfo) => {
     return { result: res };
 }
 
+export const getNotifications = async (id) =>{
+    
+}
 
 export default class modService {
     // Room-type
@@ -752,4 +755,7 @@ export default class modService {
     //user info
     static getModInfo = getModInfo;
     static editInfo = editInfo
+
+    //notifications 
+    static getNotifications = getNotifications
 }
