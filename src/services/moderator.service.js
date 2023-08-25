@@ -4,21 +4,6 @@ import { Account, Moderator } from "../databases/account.model.js";
 
 
 export const getRoomType = async (id) => {
-
-    // try {
-    //     const roomType = await RoomType.aggregate([
-    //         {
-    //             $match:
-    //             {
-    //                 hotel_id: id,
-    //             },
-    //         }
-    //     ])
-    //     return roomType
-    // } catch (error) {
-    //     return { error: error.message };
-    // }
-
     try {
         const roomType = await RoomType.find();
         return { result: roomType };
@@ -27,28 +12,6 @@ export const getRoomType = async (id) => {
     }
 }
 
-const roomTypeValidator = (data) => {
-    const rule = joi.object({
-        hotel_id: joi.string().required(),
-        room_type_id: joi.string().required(),
-        name: joi.string().required(),
-    });
-    const result = rule.validate(data);
-    if (result.error) {
-        throw new Error(result.error.details[0].message);
-    }
-}
-
-export const insertRoomType = async (data) => {
-    try {
-        // console.log(JSON.stringify(data, null, 2));
-        const roomType = new RoomType(data);
-        await roomType.save();
-        return { result: `Inserted ${data.name} into data` };
-    } catch (error) {
-        return { error: error.message };
-    }
-}
 
 export const updateRoomTypeName = async (data) => {
     try {
@@ -100,25 +63,6 @@ export const getRoomInfo = async () => {
         return { error: error.message };
     }
 }
-
-const roomValidator = (data) => {
-    const rule = joi.object({
-        hotel_id: joi.string().required(),
-        room_id: joi.string().required(),
-        room_type_id: joi.string().required(),
-        name: joi.string().required(),
-        number_of_guest: joi.string().required(),
-        number_of_bedroom: joi.string().required(),
-        number_of_bathroom: joi.string().required(),
-        area: joi.string().required(),
-        price: joi.string().required(),
-    });
-    const result = rule.validate(data);
-    if (result.error) {
-        throw new Error(result.error.details[0].message);
-    }
-}
-
 
 const insertNewRoomAmenity = async (data, roomid) => {
 
@@ -182,7 +126,6 @@ export const updateRoomInfo = async (data) => {
 
 export const deleteRoom = async (id) => {
     try {
-
         const result = await Room.findOneAndDelete({
             _id: id,
         });
@@ -197,13 +140,7 @@ export const deleteRoom = async (id) => {
 }
 
 export const getHotelInfo = async () => {
-    // const { data, error } = await db
-    //     .from("moderator")
-    //     .select();
-    // if (error) {
-    //     return { error: error.message };
-    // }
-    const data = await Moderator.find();
+    const data = await Moderator.find().lean();
     if (!data) {
         return { error: `Invalid request` };
     }
@@ -211,18 +148,9 @@ export const getHotelInfo = async () => {
 }
 
 export const getHotelById = async (id) => {
-    // const { data, error } = await db
-    //     .from("moderator")
-    //     .select()
-    //     .match({
-    //         account_id: id,
-    //     })
-    // if (error) {
-    //     return { error: error.message };
-    // }
     const data = await Moderator.findOne({
         account_id: id,
-    });
+    }).lean();
     if (!data) {
         return { error: `Invalid request` };
     }
@@ -230,9 +158,6 @@ export const getHotelById = async (id) => {
 }
 
 export const getHotelRoomList = async (id) => {
-    //console.log(id)
-    //let result = await Room.find({hotel_id: (id)})
-
     let result = await Room.aggregate([
         {
             $addFields: {
@@ -276,40 +201,6 @@ export const getHotelRoomList = async (id) => {
             }
         }
     ])
-
-    // let result = await Moderator.aggregate([
-    //     {
-    //         $lookup: {
-    //             from: "rooms",
-    //             localField: "account_id",
-    //             foreignField: "hotel_id",
-    //             as: "rooms",
-    //         },
-    //     },
-    //     {
-    //         $unwind: "$rooms",
-    //     },
-    //     {
-    //         $addFields: {
-    //             "rooms.type_id" : {$toObjectId: "$rooms.room_type_id"}
-    //         },
-
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: "room_types",
-    //             localField: "rooms.type_id",
-    //             foreignField: "_id",
-    //             as: "room_type",
-    //         },
-    //     },
-    //     {
-    //         $match: {
-    //             account_id: id,
-    //         },
-    //     },
-
-    // ]);
     console.log(result);
     if (!result) {
         return { error: "Internal error" };
@@ -408,7 +299,6 @@ export const getVerify = async (hotel_id) => {
         },
         {
             $project: {
-                
                 image: '$room.image',
                 room: '$room.name',
                 customer : '$customer.full_name',
@@ -430,7 +320,7 @@ export const getVerify = async (hotel_id) => {
 export const acceptVerify = async (id) => {
 
     let res = await Booking.updateOne(
-        {_id : id} , 
+        {_id : id} ,
         { $set: {status: "approved"} }
     )
 
@@ -444,7 +334,7 @@ export const acceptVerify = async (id) => {
 export const declineVerify = async (id) => {
 
     let res = await Booking.updateOne(
-        {_id : id} , 
+        {_id : id} ,
         { $set: {status: "rejected"} }
     )
 
@@ -522,7 +412,7 @@ export const getCheckin = async (hotel_id) => {
         },
         {
             $project: {
-                
+
                 image: '$room.image',
                 room: '$room.name',
                 customer : '$customer.full_name',
@@ -543,7 +433,7 @@ export const getCheckin = async (hotel_id) => {
 export const checkin = async (id) => {
 
     let res = await Booking.updateOne(
-        {_id : id} , 
+        {_id : id} ,
         { $set: {status: "staying"} }
     )
 
@@ -601,7 +491,7 @@ export const getCheckout = async (hotel_id) => {
         },
         {
             $project: {
-                
+
                 image: '$room.image',
                 room: '$room.name',
                 customer : '$customer.full_name',
@@ -620,9 +510,9 @@ export const getCheckout = async (hotel_id) => {
 }
 
 export const checkout = async (id) => {
-    
+
     let res = await Booking.updateOne(
-        {_id : id} , 
+        {_id : id} ,
         { $set: {status: "completed"} }
     )
 
@@ -664,7 +554,7 @@ export const getModInfo = async (id) => {
         }
     ]);
 
-    
+
     if (!data) {
         return { error: `Invalid request` };
     }
@@ -679,7 +569,7 @@ export const editInfo = async (id, newinfo) => {
     if(newinfo["newImage"] == true)
     {
             res = await Moderator.updateOne(
-                {  account_id : id} , 
+                {  account_id : id} ,
                 { $set: {
                     hotel_name : newinfo["hotel_name"],
                     address : newinfo["address"],
@@ -688,10 +578,10 @@ export const editInfo = async (id, newinfo) => {
             } }
         )
     }
-    else 
+    else
     {
         res = await Moderator.updateOne(
-            {  account_id : id} , 
+            {  account_id : id} ,
             { $set: {
                 hotel_name : newinfo["hotel_name"],
                 address : newinfo["address"],
@@ -705,10 +595,10 @@ export const editInfo = async (id, newinfo) => {
     }
 
     res = await Account.updateOne(
-        {  _id: mongoose.Types.ObjectId(id) }, 
+        {  _id: mongoose.Types.ObjectId(id) },
         { $set: {
             phone : newinfo["phone"],
-    } 
+    }
     }
     )
     if (!res) {
@@ -721,10 +611,9 @@ export const editInfo = async (id, newinfo) => {
 
 export default class modService {
     // Room-type
-    static getRoomType = getRoomType;
-    static insertRoomType = insertRoomType;
-    static updateRoomTypeName = updateRoomTypeName;
-    static deleteRoomType = deleteRoomType;
+    // static getRoomType = getRoomType;
+    // static updateRoomTypeName = updateRoomTypeName;
+    // static deleteRoomType = deleteRoomType;
     // Room
     static insertNewRoom = insertNewRoom;
     static getRoomInfo = getRoomInfo;

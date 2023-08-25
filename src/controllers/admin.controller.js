@@ -104,6 +104,15 @@ const getReportOfHotel = async (req, res) => {
     res.status(200).json({ message: result });
 }
 
+const updateReadingStatus = async (req, res) => {
+    const id = req.params.id;
+    const { result, error } = await adminService.updateReadingStatus(id);
+    if (error) {
+        return res.status(400).json({ error: error });
+    }
+    res.status(200).json({ message: result });
+}
+
 export default {
     activeModerator,
     getModerators,
@@ -116,5 +125,6 @@ export default {
     activeRoom,
     removeRoom,
     getReportList,
-    getReportOfHotel
+    getReportOfHotel,
+    updateReadingStatus
 }

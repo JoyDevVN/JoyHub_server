@@ -1,5 +1,5 @@
 import {Room, RoomAmenity} from "../databases/room.model.js";
-import {Account, Customer, Moderator} from "../databases/account.model.js";
+import {Customer, Moderator, Account} from "../databases/account.model.js";
 import {Notification, Rating, Report} from "../databases/notification.model.js";
 import {Booking} from "../databases/booking.model.js";
 
@@ -108,7 +108,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                             {
                                 $lookup:
                                     {
-                                        from: "room_amenity",
+                                        from: "room_amenities",
                                         localField: "new_id",
                                         foreignField: "room_id",
                                         pipeline: [
@@ -257,7 +257,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                 return item;
             }
         )
-        // console.log(JSON.stringify(bookings, null, 2));
+        console.log(JSON.stringify(data, null, 2));
         return {result: data};
     } catch (error) {
         return {error: error.message};
@@ -614,9 +614,9 @@ export const report = async (customer_id, booking_id, content) => {
         }
         // get the name of the hotel and customer
         let hotel = await Moderator.findOne({account_id: booking.hotel_id}, {hotel_name: 1});
-        let customer = await Customer.findOne({account_id: customer_id}, {full_name: 1});
+        let customer = await Account.findById(customer_id, {username: 1});
         // generate title of the report from content
-        let title = `Report from ${customer.full_name} to ${hotel.hotel_name}`;
+        let title = `Report from ${customer.username}`;
 
         let report = new Report({
             booking_id: booking_id,
@@ -644,7 +644,7 @@ const updateInfo = async (id, full_name, email, phone) => {
             email: email,
             phone: phone
         }
-    );
+    ).lean();
     if (!data1) {
         return {error: "This account does not exist"};
     }
