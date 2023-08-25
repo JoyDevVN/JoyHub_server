@@ -7,9 +7,9 @@ const router = express.Router();
 /// /api/mod/room-type
 /// req.body: { username, room_type_id, room_type_name }
 /// res: { message}
-router.get('/room-type', verify, modController.verifyMod, modController.getRoomType);
-router.post('/room-type', verify, modController.verifyMod, modController.insertRoomType);
-router.put('/room-type', verify, modController.verifyMod, modController.updateRoomTypeName);
+// router.get('/room-type', verify, modController.verifyMod, modController.getRoomType);
+// router.post('/room-type', verify, modController.verifyMod, modController.insertRoomType);
+// router.put('/room-type', verify, modController.verifyMod, modController.updateRoomTypeName);
 
 /// /api/mod/room
 /// req.body: { username, room_type_id, room_type_name }
