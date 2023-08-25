@@ -108,7 +108,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                             {
                                 $lookup:
                                     {
-                                        from: "room_amenity",
+                                        from: "room_amenities",
                                         localField: "new_id",
                                         foreignField: "room_id",
                                         pipeline: [
@@ -123,7 +123,6 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                                                                 $project: {
                                                                     "_id": 0,
                                                                     "name": 1,
-                                                                    "account": 1
                                                                 }
                                                             }
                                                         ],
