@@ -123,7 +123,6 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                                                                 $project: {
                                                                     "_id": 0,
                                                                     "name": 1,
-                                                                    "account": 1
                                                                 }
                                                             }
                                                         ],
