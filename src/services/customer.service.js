@@ -1,5 +1,5 @@
 import {Room, RoomAmenity} from "../databases/room.model.js";
-import {Customer, Moderator} from "../databases/account.model.js";
+import {Account, Customer, Moderator} from "../databases/account.model.js";
 import {Notification, Rating, Report} from "../databases/notification.model.js";
 import {Booking} from "../databases/booking.model.js";
 
@@ -635,6 +635,33 @@ export const report = async (customer_id, booking_id, content) => {
     }
 }
 
+const updateInfo = async (id, full_name, email, phone) => {
+    const data1 = await Account.findOneAndUpdate(
+        {
+            _id: id,
+        },
+        {
+            email: email,
+            phone: phone
+        }
+    );
+    if (!data1) {
+        return {error: "This account does not exist"};
+    }
+    const data2 = await Customer.findOneAndUpdate(
+        {
+            account_id: id,
+        },
+        {
+            full_name: full_name,
+        }
+    );
+    if (!data2) {
+        return {error: "This customer does not exist"};
+    }
+    return {result: "success"};
+};
+
 export default class customerService {
     static getHotelList = getHotelList;
     static getNotificationList = getNotificationList;
@@ -645,4 +672,5 @@ export default class customerService {
     static getRoomInfo = getRoomInfo;
     static rating = rating;
     static report = report;
+    static updateInfo = updateInfo;
 }

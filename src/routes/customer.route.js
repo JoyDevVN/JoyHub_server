@@ -18,5 +18,6 @@ router.get('/getReservation', verify, customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
 router.post('/rating', verify, customerController.rating);
 router.post('/report', verify, customerController.report);
+router.put('/profile', customerController.updateInfo)
 
 export default router;

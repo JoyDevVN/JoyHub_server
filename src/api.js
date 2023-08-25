@@ -15,6 +15,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const router = Router();
 const app = express();
+
 // middleware
 app.use(json());
 app.use(urlencoded({ extended: false }));
@@ -44,6 +45,7 @@ mongoose.connect(process.env.MONGO_URL, {
     console.error("[MONGO] Connection error", err.message);
     process.exit();
 });
+
 export default app;
 const app_handler = serverless(app);
 
