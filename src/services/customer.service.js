@@ -413,6 +413,7 @@ export const getReservation = async (id) => {
                                 {
                                     $project: {
                                         "hotel_name": 1,
+                                        "address": 1,
                                     }
                                 },
                             ],
