@@ -153,6 +153,7 @@ export const getHotelInfo = async (id, check_in, check_out) => {
                                     "isBooked": 1,
                                     "room_type": 1,
                                     "amenity_list": 1,
+                                    "image": 1,
                                 }
                             }
 
