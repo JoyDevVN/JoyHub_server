@@ -17,13 +17,13 @@ router.get('/getPreBill/:room_id', verify, customerController.getPreBill);
 router.get('/getReservation', verify, customerController.getReservation);
 router.get('/notification_list', verify, customerController.getNotificationList);
 
-//req.body  { booking_id, star, content}
+//req.body  { booking_id, star, comment}
 router.post('/rating', verify, customerController.rating);
 
 //req.body  { booking_id, content}
 router.post('/report', verify, customerController.report);
 
-//req.body  { email, phone, user_name}
+//req.body  { email, phone, full_name}
 router.put('/profile', verify, customerController.updateInfo)
 
 //req.body  { hotel_id, room_id}
