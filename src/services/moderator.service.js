@@ -298,10 +298,12 @@ export const getVerify = async (hotel_id) => {
             $project: {
                 image: '$room.image',
                 room: '$room.name',
+                room_id: '$room._id',
                 customer: '$customer.full_name',
                 checkin: '$check_in',
                 checkout: '$check_out',
-                phone: '$acc.phone'
+                phone: '$acc.phone',
+                customer_id: '$account_id'
             }
         }
     ]);
@@ -692,6 +694,19 @@ export const getNotifications = async (id) => {
         return { result: notification }
 }
 
+export const sendNotifications = async (id,noti) =>{
+    let res = null
+  
+    try{
+        res = await Notification.create({ ...noti, from_id: id });
+  
+    }catch(e)
+    {
+        console.log("ERROR: ", e)
+    }
+    return {result :res}
+}
+
 export const withdraw = async (id, money) => {
     let res = await Account.findByIdAndUpdate(
         { _id: id },
@@ -740,7 +755,8 @@ export default class modService {
     static editInfo = editInfo
 
     //notifications
-    static getNotifications = getNotifications
+    static getNotifications = getNotifications  
+    static sendNotifications = sendNotifications
 
     //withdraw
     static withdraw = withdraw

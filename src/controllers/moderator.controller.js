@@ -240,6 +240,15 @@ export const getNotifications = async (req, res) =>{
     res.status(200).json({ message: result });
 }
 
+export const sendNotifications = async (req, res) =>{
+    const id = req.user.account_id;
+    const { result, error } = await modService.sendNotifications(id,req.body);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
+
 export const withdraw = async (req, res) =>{
     const id = req.user.account_id;
     const money = req.params.money;
@@ -288,6 +297,7 @@ export default class modController {
 
     //notifications
     static getNotifications = getNotifications;
+    static sendNotifications = sendNotifications;
 
     //withdraw
     static withdraw = withdraw;

@@ -62,6 +62,7 @@ router.post('/amenity', modController.addAmenity);
 
 //Notifications
 router.get('/notification',verify, modController.verifyMod, modController.getNotifications);
+router.post('/notification', verify, modController.verifyMod, modController.sendNotifications);
 
 //withdraw
 router.put('/withdraw/:money',verify, modController.verifyMod, modController.withdraw)
