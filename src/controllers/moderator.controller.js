@@ -54,8 +54,9 @@ export const insertNewRoom = async (req, res) => {
 };
 
 export const updateRoomInfo = async (req, res) => {
-    req.body.hotel_id = req.user.account_id;
-    const { result, error } = await modService.updateRoomInfo(req.body);
+  
+    console.log("CUC DATA", req.body)
+    const { result, error } = await modService.updateRoomInfo(req.body.id,req.body);
     if (error) {
         return res.status(401).json({ message: error });
     }
@@ -239,6 +240,17 @@ export const getNotifications = async (req, res) =>{
     res.status(200).json({ message: result });
 }
 
+export const withdraw = async (req, res) =>{
+    const id = req.user.account_id;
+    const money = req.params.money;
+    console.log("MONEY: " , money);
+    const { result, error } = await modService.withdraw(id,money);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+}
+
 export default class modController {
     static verifyMod = verifyMod;
     // Room-type
@@ -276,4 +288,7 @@ export default class modController {
 
     //notifications
     static getNotifications = getNotifications;
+
+    //withdraw
+    static withdraw = withdraw;
 }

@@ -96,23 +96,19 @@ export const insertNewRoom = async (hotel_id, data) => {
     }
 }
 
-export const updateRoomInfo = async (data) => {
+export const updateRoomInfo = async (id, data) => {
     try {
-        const room_type = await RoomType.findOne({
-            name: data.room_type,
-            hotel_id: data.hotel_id
-        }).exec();
-        data.room_type_id = room_type._id;
+       
+  
         const result = await Room.findOneAndUpdate(
             {
-                _id: data.room_id,
-                hotel_id: data.hotel_id
+                _id: id
             },
             {
-                name: data.name,
-                room_type_id: data.room_type_id,
-                isAccepted: data.isAccepted,
-                isBooked: data.isBooked,
+                bedroom : data.bed,
+                guest : data.people,
+                area : data.area,
+                description : data.description
             }
         );
         if (!result) {
@@ -633,6 +629,7 @@ export const getModInfo = async (id) => {
                 description: 1,
                 owner_name: 1,
                 isAccepted: 1,
+                wallet : "$acc.wallet",
                 phone: "$acc.phone",
                 email: "$acc.email",
                 username: "$acc.username",
@@ -695,6 +692,20 @@ export const getNotifications = async (id) => {
         return { result: notification }
 }
 
+export const withdraw = async (id, money) => {
+    let res = await Account.findByIdAndUpdate(
+        { _id: id },
+        { $set: { wallet: money } }
+    )
+
+    if (!res) {
+        return { error: `Invalid request` };
+    }
+
+    return { result: res };
+
+}
+
 export default class modService {
     // Room-type
     // static getRoomType = getRoomType;
@@ -730,4 +741,7 @@ export default class modService {
 
     //notifications
     static getNotifications = getNotifications
+
+    //withdraw
+    static withdraw = withdraw
 }
