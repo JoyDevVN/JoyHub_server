@@ -24,14 +24,14 @@ const register = async (data) => {
             password: bcrypt.hashSync(password, salt),
             role: role,
         });
-        // const savedAccount = await account.save();
+        const savedAccount = await account.save();
         // insert account to customer or hotel
         if (role === "customer") {
             const customer = new Customer({
                 account_id: savedAccount._id,
                 full_name: data.full_name,
             });
-            await Promise.all([account.save(), customer.save()]);
+            await customer.save();
         } else if (role === "moderator") {
             const moderator = new Moderator({
                 account_id: savedAccount._id,
@@ -40,7 +40,7 @@ const register = async (data) => {
                 description: data.description,
                 owner_name: data.owner_name,
             });
-            await Promise.all([account.save(), moderator.save()]);
+            await moderator.save();
         }
 
         return { result: `Account ${username} is created`, error: null };
