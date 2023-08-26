@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 router.post('/room', verify, bookingController.bookRoom);
-/// req.body: { money}
+/// req.body: { account_id, money }
 router.post('/addmoney', bookingController.addMoney);
 
 /// /booking/room
