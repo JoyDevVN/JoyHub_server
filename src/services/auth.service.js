@@ -13,7 +13,7 @@ const isExist = async (username, email) => {
 
 const register = async (data) => {
     try {
-        const { username, email, password, role } = data;
+        const { username, email, password, role, phone } = data;
         // console.log(`[INFO] Registering account ${JSON.stringify(data)}`);
         // check if username or email already exists
         await isExist(username);
@@ -23,6 +23,7 @@ const register = async (data) => {
             email: email,
             password: bcrypt.hashSync(password, salt),
             role: role,
+            phone: phone,
         });
         const savedAccount = await account.save();
         // insert account to customer or hotel
