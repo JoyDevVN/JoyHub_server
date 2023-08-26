@@ -107,6 +107,17 @@ export const cancelRoom = async (req, res) => {
     res.status(200).json({ message: result });
 }
 
+export const getUserInfo = async (req, res) => {
+    //const id = req.user.account_id;
+    const id = "64ddff79df3bc0763ba06d52";
+    const { result, error } = await customerService.getUserInfo(id);
+    if (error) {
+        return res.status(401).json({ message: error });
+    }
+    res.status(200).json({ message: result });
+};
+
+
 export default class customerController {
     static getHotelList = getHotelList;
     static getHotelInfo = getHotelInfo;
@@ -119,4 +130,5 @@ export default class customerController {
     static report = report;
     static updateInfo = updateInfo;
     static cancelRoom = cancelRoom;
+    static getUserInfo = getUserInfo;
 }

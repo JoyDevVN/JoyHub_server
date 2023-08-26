@@ -29,5 +29,8 @@ router.put('/profile', verify, customerController.updateInfo)
 //req.body  { hotel_id, room_id}
 router.put('/cancelRoom', verify, customerController.cancelRoom)
 
+//req.body  { hotel_id, room_id}
+router.get('/getUserInfo', verify, customerController.getUserInfo)
+
 
 export default router;

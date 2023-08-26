@@ -681,6 +681,58 @@ const cancelRoom = async (id, hotel_id, room_id) => {
     return {result: "success"};
 };
 
+export const getUserInfo = async (id) => {
+    try {
+        /*
+        let data = await Room.findById(id)
+        if (!data) {
+            return { error: `Invalid request` };
+        }
+        */
+        let user = await Customer.aggregate([
+            {
+                $addFields:
+                    {
+                        new_id: {$toObjectId: "$account_id"}
+                    }
+            },
+            {
+                $match:
+                    {
+                        account_id: id
+                    }
+            },
+            {
+                $lookup:
+                    {
+                        from: "accounts",
+                        localField: "new_id",
+                        foreignField: "_id",
+                        pipeline: [
+                            {
+                                $project: {
+                                    "wallet": 1,
+                                    "phone": 1,
+                                    "email": 1,
+                                }
+                            },
+                        ],
+                        as: "account",
+                    }
+            },
+            {
+                $project: {
+                    "full_name": 1,
+                    "account": 1
+                }
+            },
+        ])
+        return {result: user};
+    } catch (error) {
+        return {error: error.message};
+    }
+}
+
 export default class customerService {
     static getHotelList = getHotelList;
     static getNotificationList = getNotificationList;
@@ -693,4 +745,5 @@ export default class customerService {
     static report = report;
     static updateInfo = updateInfo;
     static cancelRoom = cancelRoom;
+    static getUserInfo = getUserInfo;
 }
