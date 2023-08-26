@@ -98,7 +98,6 @@ export const deleteBill = async (req, res) => {
 };
 
 export const addMoney = async (req, res) => {
-    req.body.account_id = "64ddff79df3bc0763ba06d52";
     const { result, error } = await bookingService.addMoney(req.body);
     if (error) {
         return res.status(401).json({ message: error });

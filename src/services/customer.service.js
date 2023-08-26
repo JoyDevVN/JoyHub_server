@@ -484,6 +484,7 @@ export const getReservation = async (id) => {
                 }
                 if (item.hotels) {
                     item.hotel_name = item.hotels.hotel_name;
+                    item.address = item.hotels.address;
                     delete item.hotels;
                 }
                 return item;
@@ -673,7 +674,7 @@ const cancelRoom = async (id, hotel_id, room_id) => {
         {
             status: "canceled",
         }
-    );
+    ).lean();
     if (!data) {
         return {error: "This account did not book this room"};
     }
