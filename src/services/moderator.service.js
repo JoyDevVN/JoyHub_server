@@ -625,6 +625,11 @@ export const getModInfo = async (id) => {
             },
         },
         {
+            $match:{
+                account_id : id
+            }
+        },
+        {
             $project: {
                 hotel_name: 1,
                 address: 1,
